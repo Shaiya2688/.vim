@@ -1,0 +1,51 @@
+snippet __cc "common comment"
+/* ${1:$text$} */
+endsnippet
+
+snippet __cm "macro or elements comment"
+/**< ${1:$text$} */
+endsnippet
+
+snippet __cb "brief typedef or function comment"
+/**@brief ${1:$text$} */
+endsnippet
+
+snippet __cd "detail type or function comment"
+/**@brief ${1:$brief_text$}.
+ *
+ * @details ${2:$details_text$}.
+ *
+ * @param[in]     ${3:$param1$}	${4:$param1_text$}.
+ * @param[out]    ${5:$param2$}	${6:$param2_text$}.
+ * @param[in,out] ${7:$param3$}	${8:$param3_text$}.
+ *
+ * @return ${9:$return_text$}.
+ *
+ * @retval ${10:$retval1$} ${11:$retval1_text$}.
+ * @retval ${12:$retval2$} ${13:$retval2_text$}.
+ *
+ * @warning ${14:$warning_text$}.
+ */
+endsnippet
+
+snippet __cg "group comment"
+/******************************************************************************/
+/** @group ${1:$name$}
+ * ${2:$text$}
+ *  @{ */
+/******************************************************************************/
+${4}
+/** @} end $1 */
+endsnippet
+
+snippet __cf "file comment"
+/******************************************************************************/
+/** @author	`!v g:snips_author` <`!v g:snips_email`>
+ *  @date	`date +%Y/%m/%d`
+ *  @file	`!p snip.rv = snip.fn`
+ *  @brief	${1:$brief_text$}
+ *  @{ */
+/******************************************************************************/
+${2}
+/** @} end `!p snip.rv = snip.fn` */
+endsnippet

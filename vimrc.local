@@ -1,0 +1,756 @@
+" ----------------------------- VIM common settings Start -----------------------------
+set nocompatible	"first option, enable VIM extended functionality based on VI
+filetype off		"Some plugins need to turn this off
+syntax enable		"enable Syntax highlighting, allows using ":highlight/:hi" commands to set your preferred colors
+syntax on			"start highlighting
+set ruler			"show the cursor position all the time(VI default: off)
+set showmode		"show current mode(Vim default: on, Vi default: off)
+set showtabline=1	"show tabline for multi-tabs
+set nowrap			"no wrap long line
+set nu				"view line number
+set ts=4			"set tab view size
+set ignorecase		"ignore character case
+"colorscheme desert	"may be need in the future
+set backspace=indent,eol,start	"set backspace can remove autoindent or join previous line(VI is disable)
+set showmatch		"when a bracket is inserted, briefly jump to the matching one if the match can be seen on the screen.
+delmarks!			"clear position of a-z marks, m{a-zA-Z} to mark position, `{a-zA-Z} or '{a-zA-Z} to jump assigned position
+let mapleader = '\'	"set defalut mapleader to use to keymap
+set ttimeoutlen=50	"The time in milliseconds that is waited for a key code or mapped key sequence to complete.
+set t_Co=256		"Color setting, force Vim into 256 color mode to bypass the automatic detection of terminal colors
+
+"Help key map for show defined commands"
+nmap <C-F1> :call HelpCmdInfo()<cr>
+
+"set common highlight, see 'help highlight' or 'help cterm'/'help gui' for help
+hi Visual term=reverse cterm=NONE ctermbg=7 guibg=LightGray "visual mode select pattern color
+hi LineNr cterm=NONE ctermfg=7 "set line number color
+hi CursorLineNr cterm=bold ctermfg=0 "set cursor line number bold
+set hlsearch
+hi Search cterm=underline,bold ctermfg=4 ctermbg=7 "search pattern color
+set cursorline
+hi cursorline cterm=NONE ctermbg=lightgray "cursor line background color
+
+"mouse mode setting
+set mouse=nvih
+map <s-z> :set<Space>mouse=nvih<cr>
+map <s-x> :set<Space>mouse=v<cr>
+
+"indent setting
+"set autoindent
+set smartindent
+set shiftwidth=4
+
+"vim diff settings
+"set crb (be temporarily set by default)
+"set scb (be temporarily set by default)
+set diffopt=filler,context:10,vertical,foldcolumn:1
+hi DiffAdd cterm=NONE ctermbg=7 ctermfg=1
+hi DiffDelete cterm=NONE ctermbg=7 ctermfg=6
+hi DiffChange cterm=NONE ctermbg=7
+hi DiffText cterm=NONE ctermbg=7 ctermfg=1
+
+"file format setting for <EOL> define
+set fileformat=unix
+set fileformats=unix,dos
+
+"file encode setting
+set encoding=utf-8
+set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
+if v:lang =~ "utf8$" || v:lang =~ "utf-8$"
+  set fencs=utf-8,ucs-bom,latin1
+endif
+
+"font setting
+"set guifont=Courier_New:h11:cANSI
+"set guifontwide=新宋体:h11:cGB2312
+
+"help language setting
+set helplang=cn "if have found cn help doc
+
+"fold setting
+"set foldmethod=indent "fold by have the same indentation
+set foldmethod=syntax
+set foldlevel=100
+set fdc=0
+"nmap <Space>r :let &fdc =1-&fdc<cr>
+nmap <Space>r :if &fdc>0\|set fdc=0\|else\|set fdc=1\|endif<cr>
+hi FoldColumn term=standout cterm=NONE ctermbg=7 ctermfg=4
+hi Folded term=standout cterm=NONE ctermbg=7 ctermfg=4
+
+"popmenu setting
+set completeopt=longest,menu ",preview
+hi Pmenu ctermfg=0 ctermbg=7
+hi PmenuSel cterm=bold ctermfg=0 ctermbg=2
+
+"common shortcuts setting ,help keycodes fot more information
+vmap <C-c> y
+vmap <C-x> d
+nmap <C-v> <s-p>l
+imap <C-v> <esc>l<s-p>li
+map <C-a> <esc>ggVG
+
+"select block shortcuts setting
+nmap <Space>q	vab
+nmap <Space>w	vaB
+nmap <Space>e	v%
+
+"window move shortcuts setting
+map <A-LEFT> <C-w><C-h>
+map <A-RIGHT> <C-w><C-l>
+map <A-UP> <C-w><C-k>
+map <A-DOWN> <C-w><C-j>
+map <S-A-LEFT> <C-w><
+map <S-A-RIGHT> <C-w>>
+map <S-A-UP> <C-w>+
+map <S-A-DOWN> <C-w>-
+" <C-W><C-x/H/J/K/L> to exchange window
+
+"tab page move shortcuts setting, switch tab page use <c-pageup>/<c-pagedown>
+nmap > :+tabmove<cr>
+nmap < :-tabmove<cr>
+
+"search shortcuts setting
+vn <F2> y:/<C-r>0<cr>
+vn <F3> y:call JumpStack_Begin()<cr>:vimgrep<Space>/<C-r>0/<Space>%<cr>:call JumpStack_Done()<cr>:bo copen<cr>/<C-r>0<cr><cr>
+vn <F4> y:call JumpStack_Begin()<cr>:vimgrep<Space>/<C-r>0/<Space>%<Space>**<cr>:call JumpStack_Done()<cr>:bo copen<cr>/<C-r>0<cr><cr>
+nn <F2> /<C-r><C-w><cr>
+nn <F3> :call JumpStack_Begin()<cr>/<C-r><C-w><cr>:vimgrep<Space>/<C-r>//<Space>%<cr>:call JumpStack_Done()<cr>:bo copen<cr><cr>
+nn <F4> :call JumpStack_Begin()<cr>/<C-r><C-w><cr>:vimgrep<Space>/<C-r>//<Space>%<Space>**<cr>:call JumpStack_Done()<cr>:bo copen<cr><cr>
+
+"Quickfix window shortcuts setting
+nn <F5> :if !JumpWinInvalid()\|cp\|endif<cr>
+nn <F6> :if !JumpWinInvalid()\|cn\|endif<cr>
+nn <F7> :call QuickfixWinCleanClose()<cr>:call JumpStack_GoBack()<cr>
+nn <F8> :call QuickfixWinToggle()<cr>
+
+"TAGS file setting
+"auto loading tags and cscope.out
+autocmd VimEnter,BufRead * call TagsConnectUpdate()
+"update tags and cscope.out associated with current edit file
+nmap <leader>t :call TagsFileUpdate()<CR>
+
+"VIM tags setting
+nn <C-l> :ts<cr>
+map <C-]> g<C-]>
+map g<LeftMouse> g<C-]>
+nn <c-b> :tp<cr>
+nn <c-f> :tn<cr>
+set autochdir "$PWD is auto change to directory of jump
+
+"VIM cscope setting
+"for quickfix use <F5> to search previous, <F6> to search next, <F7> to go back search, <F8> to toggle quickfix window
+" set csprg=$HOME/tools/bin/cscope
+set cscopequickfix=s-,g0,c-,i-,f-,t-,e-,d- "+: appended to quickfix window; -: clear previous results and add to quickfix window; 0 or unset: don't use quickfix. warning: quickfix no jump stack
+set cst "use the commands :cstag instead of the default :tag behavior.
+nmap fs :call JumpStack_Begin()<CR>:let _cs_pattern="<C-R>=expand("<cword>")<CR>"<CR>:cs find s <C-R>=expand(_cs_pattern)<CR><CR>/<C-R>=expand(_cs_pattern)<CR><CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+nmap fg :cs find g <C-R>=expand("<cword>")<CR><CR>
+nmap fc :call JumpStack_Begin()<CR>:let _cs_pattern="<C-R>=expand("<cword>")<CR>"<CR>:cs find c <C-R>=expand(_cs_pattern)<CR><CR>/<C-R>=expand(_cs_pattern)<CR><CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+nmap fi :call JumpStack_Begin()<CR>:let _cs_pattern="<C-R>=expand("<cfile>")<CR>"<CR>:cs find i <C-R>=expand(_cs_pattern)<CR><CR>/<C-R>=expand(_cs_pattern)<CR><CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+nmap ff :call JumpStack_Begin()<CR>:let _cs_pattern="<C-R>=expand("<cfile>")<CR>"<CR>:cs find f <C-R>=expand(_cs_pattern)<CR><CR>/<C-R>=expand(_cs_pattern)<CR><CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+nmap ft :call JumpStack_Begin()<CR>:let _cs_pattern="<C-R>=expand("<cword>")<CR>"<CR>:cs find t <C-R>=expand(_cs_pattern)<CR><CR>/<C-R>=expand(_cs_pattern)<CR><CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+nmap fe :call JumpStack_Begin()<CR>:let _cs_pattern="<C-R>=expand("<cword>")<CR>"<CR>:cs find e <C-R>=expand(_cs_pattern)<CR><CR>/<C-R>=expand(_cs_pattern)<CR><CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+"nmap fd :call JumpStack_Begin()<CR>:let _cs_pattern="<C-R>=expand("<cword>")<CR>"<CR>:cs find d <C-R>=expand(_cs_pattern)<CR><CR>/<C-R>=expand(_cs_pattern)<CR><CR>:call JumpStack_Done()<CR>:bo copen<CR><CR> "why exists?
+vmap fs y:call JumpStack_Begin()<CR>:cs find s <C-R>0<CR>/<C-R>0<CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+vmap fg y:call JumpStack_Begin()<CR>:cs find g <C-R>0<CR>
+vmap fc y:call JumpStack_Begin()<CR>:cs find c <C-R>0<CR>/<C-R>0<CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+vmap fi y:call JumpStack_Begin()<CR>:cs find i <C-R>0<CR>/<C-R>0<CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+vmap ff y:call JumpStack_Begin()<CR>:cs find f <C-R>0<CR>/<C-R>0<CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+vmap ft y:call JumpStack_Begin()<CR>:cs find t <C-R>0<CR>/<C-R>0<CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+vmap fe y:call JumpStack_Begin()<CR>:cs find e <C-R>0<CR>/<C-R>0<CR>:call JumpStack_Done()<CR>:bo copen<CR><CR>
+"vmap fd y:call JumpStack_Begin()<CR>:cs find d <C-R>0<CR>/<C-R>0<CR>:call JumpStack_Done()<CR>:bo copen<CR><CR> "why exists?
+nmap frs :call Cscope_R("s")<cr>
+nmap frg :cs find g<space>
+nmap frc :call Cscope_R("c")<cr>
+nmap fri :call Cscope_R("i")<cr>
+nmap frf :call Cscope_R("f")<cr>
+nmap frt :call Cscope_R("t")<cr>
+nmap fre :call Cscope_R("e")<cr>
+"nmap frd :call Cscope_R("d")<cr> "why exists?
+func Cscope_R(pat)
+	let input_pat = input("> Find pattern input: ")
+	if input_pat != ""
+		if a:pat == "s"
+			let cs_find = "cs find s ".input_pat
+		elseif a:pat == "c"
+			let cs_find = "cs find c ".input_pat
+		elseif a:pat == "i"
+			let cs_find = "cs find i ".input_pat
+		elseif a:pat == "f"
+			let cs_find = "cs find f ".input_pat
+		elseif a:pat == "t"
+			let cs_find = "cs find t ".input_pat
+		elseif a:pat == "e"
+			let cs_find = "cs find e ".input_pat
+		endif
+		call feedkeys(":call JumpStack_Begin()\<CR>:".cs_find."\<CR>/".input_pat."\<CR>:call JumpStack_Done()\<CR>:bo copen\<CR>\<CR>", "n")
+	else
+		call feedkeys(":echo\<cr>", "n")
+	endif
+endfunc
+" ----------------------------- VIM common settings End -------------------------------
+
+" ----------------------------- Vundle Plugin Manager Start -----------------------------
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'inkarkat/vim-mark' | Plugin 'inkarkat/vim-ingo-library' "vim-mark required
+Plugin 'Shaiya2688/bracket-highlight'
+"OmniCppComplete + AutoComplPop combination or YouCompleteMe(need compile manually)
+Plugin 'OmniCppComplete'
+Plugin 'AutoComplPop'
+"Plugin 'Valloric/YouCompleteMe' "PluginInstall take time so long and required compile flags
+"Plugin 'scrooloose/syntastic' "required compile flags
+"TagList or Tagbar for tag window
+"Plugin 'taglist.vim'
+Plugin 'majutsushi/tagbar'
+Plugin 'scrooloose/nerdtree'
+Plugin 'jistr/vim-nerdtree-tabs'		"extended nerdtree for all tabs
+Plugin 'Xuyuanp/nerdtree-git-plugin'	"extended git status in nerdtree
+Plugin 'scrooloose/nerdcommenter'		"section comment and uncomment
+Plugin 'vim-airline/vim-airline' | Plugin 'vim-airline/vim-airline-themes'
+Plugin 'ctrlpvim/ctrlp.vim'	"file search and buffer manager
+Plugin 'airblade/vim-gitgutter'	"or Plugin 'mhinz/vim-signify'
+Plugin 'SirVer/ultisnips' | Plugin 'honza/vim-snippets'	"Common useful snippets for the ultisnips engine.
+"Plugin 'unblevable/quick-scope' unusefull
+Plugin 'Shaiya2688/SrcExpl' "Plugin 'wesleyche/SrcExpl', A context window, fix a bug in function SrcExpl_AdaptPlugins()
+call vundle#end()
+nmap <F9> :PluginSearch<cr>
+nmap <S-F9> :PluginClean<cr>
+nmap <F10> :PluginInstall<cr>
+nmap <S-F10> :PluginUpdate<cr>
+nmap <F12> :h vundle<cr>
+
+"Plugin 'vim-mark'
+"Mark colors setting
+hi MarkWold1 ctermfg=0 ctermbg=6 guifg=Black guibg=#8CCBEA
+hi MarkWord2 ctermfg=0 ctermbg=2 guifg=Black guibg=#A4E57E
+hi MarkWord3 ctermfg=0 ctermbg=3 guifg=Black guibg=#FFDB72
+hi MarkWord4 ctermfg=0 ctermbg=1 guifg=Black guibg=#FF7272
+hi MarkWord5 ctermfg=0 ctermbg=5 guifg=Black guibg=#FFB3FF
+hi MarkWord6 cterm=bold ctermfg=7 ctermbg=4 guifg=Black guibg=#9999FF
+hi MarkWord7 cterm=bold ctermfg=3 ctermbg=7 guifg=Black guibg=#9999FF
+hi MarkWord8 cterm=bold ctermfg=7 ctermbg=1 guifg=Black guibg=#9999FF
+hi MarkWord9 cterm=bold ctermfg=3 ctermbg=2 guifg=Black guibg=#9999FF
+hi MarkWord10 cterm=bold ctermfg=7 ctermbg=6 guifg=Black guibg=#9999FF
+"to add more in this order....
+"use \m or \r to mark and unmark
+nmap \c :MarkClear<cr>
+
+"Plugin 'Shaiya2688/bracket-highlight'
+let g:rainbow_active = 0 "command is :RainbowToggle
+nmap \5 :RainbowToggle<cr>
+let g:rainbow_conf = {
+	\	'cterms': ['NONE', 'NONE', 'NONE', 'NONE', 'NONE', 'bold', 'bold', 'bold', 'bold', 'bold'],
+	\	'ctermbgs': ['6', '2', '3', '1', '5', '4', '7', '1', '2', '6'],
+	\	'ctermfgs': ['0', '0', '0', '0', '0', '7', '3', '7', '3', '7'],
+	\	'guibgs': ['#8CCBEA', '#A4E57E', '#FFDB72', '#FF7272', '#FFB3FF', '#9999FF', '#9999FF', '#9999FF', '#9999FF', '#9999FF'],
+	\	'guifgs': ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+	\	'operators': '',
+	\	'parentheses': ['start=/(/ end=/)/ fold', 'start=/\[/ end=/\]/ fold', 'start=/{/ end=/}/ fold'],
+	\	'separately': {
+	\		'*': {},
+	\		'tex': {
+	\			'parentheses': ['start=/(/ end=/)/', 'start=/\[/ end=/\]/'],
+	\		},
+	\		'lisp': {
+	\			'guifgs': ['royalblue3', 'darkorange3', 'seagreen3', 'firebrick', 'darkorchid3'],
+	\		},
+	\		'vim': {
+	\			'parentheses': ['start=/(/ end=/)/', 'start=/\[/ end=/\]/', 'start=/{/ end=/}/ fold', 'start=/(/ end=/)/ containedin=vimFuncBody', 'start=/\[/ end=/\]/ containedin=vimFuncBody', 'start=/{/ end=/}/ fold containedin=vimFuncBody'],
+	\		},
+	\		'html': {
+	\			'parentheses': ['start=/\v\<((area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)[ >])@!\z([-_:a-zA-Z0-9]+)(\s+[-_:a-zA-Z0-9]+(\=("[^"]*"|'."'".'[^'."'".']*'."'".'|[^ '."'".'"><=`]*))?)*\>/ end=#</\z1># fold'],
+	\		},
+	\		'css': 0,
+	\	}
+	\}
+
+"Plugin 'OmniCppComplete'
+let OmniCpp_NamespaceSearch = 1
+let OmniCpp_GlobalScopeSearch = 1
+let OmniCpp_ShowAccess = 1
+let OmniCpp_ShowPrototypeInAbbr = 1 "show function parameters
+let OmniCpp_MayCompleteDot = 1 "autocomplete after .
+let OmniCpp_MayCompleteArrow = 1 "autocomplete after ->
+let OmniCpp_MayCompleteScope = 1 "autocomplete after ::
+
+"Plugin 'AutoComplPop'
+let g:acp_enableAtStartup = 1 "enable on start vim
+let g:acp_ignorecaseOption = 1 "set to 'ignorecase' temporarily
+let g:acp_completeOption = '.,w,b,k' " set to 'complete' temporarily
+let g:acp_behaviorKeywordCommand = "\<C-p>"
+"let g:acp_completeoptPreview = 1
+
+"Plugin 'Valloric/YouCompleteMe' Setting invalid!!
+"Compail and Install please ref URL: https://github.com/Valloric/YouCompleteMe#installation or :h YouCompleteMe, see Installation->Linux 64-bit/Full Installation Guide
+"For Ubuntu 16.04 and later(Vim 7.4.1578 with Python 2 or Python 3 support):
+"1. Install development tools, CMake, and Python headers: sudo apt install build-essential cmake python3-dev
+"2. Compiling YCM **with** semantic support for C-family languages: a. cd ~/.vim/bundle/YouCompleteMe b. sudo python3 install.py --clang-completer --java-complete (install JDK8 required, if you want work for everyone, then you can check full installation guide)
+"let g:ycm_global_ycm_extra_conf='~/.vim/.ycm_extra_conf.py' "copy from ??, for information on how to generate a compilation database
+
+"Plugin 'scrooloose/syntastic'
+"it need project compile flags, so it is a very bad thing
+"set statusline+=%#warningmsg#
+"set statusline+=%{SyntasticStatuslineFlag()}
+"set statusline+=%*
+"let g:syntastic_check_on_open = 0
+"let g:syntastic_always_populate_loc_list = 1
+"let g:syntastic_auto_loc_list = 1
+"let g:syntastic_check_on_wq = 1
+"let g:syntastic_auto_jump = 1
+"let g:syntastic_loc_list_height = 10
+
+"Plugin 'taglist.vim'
+"let Tlist_OnlyWindow=1
+"let Tlist_Exit_OnlyWindow=1
+"let Tlist_Use_Right_Window=0
+"let Tlist_Auto_Open=0
+"let Tlist_Close_On_Select=0
+"let Tlist_Max_Tag_Length=20
+"let Tlist_Use_SingleClick=0
+"let Tlist_Show_Menu=1
+"let Tlist_Max_Submenu_Items=10
+"let Tlist_File_Fold_Auto_Close=1
+"let Tlist_WinHeight=10
+"let Tlist_WinWidth=28
+"let Tlist_Use_Horiz_Window=0
+""let Tlist_Highlight_Tag_On_BufEnter = 1
+""let Tlist_Ctags_Cmd='/usr/bin/ctags'
+""let Tlist_Ctags_Cmd='/home/shaiya/tools/bin/ctags'
+"map , :Tlist<cr>	"use tagbar to manager tag symbols
+
+"Plugin 'majutsushi/tagbar'
+let g:tagbar_left = 1
+let g:tagbar_width=33
+let g:tagbar_sort = 0
+let g:tagbar_indent = 1
+let g:tagbar_zoomwidth = 0
+let g:tagbar_autoclose = 0
+let g:tagbar_autofocus = 1
+let g:tagbar_autoshowtag = 0
+let g:tagbar_previewwin_pos = 'bo'
+""let g:tagbar_ctags_bin='/usr/bin/ctags'
+""let g:tagbar_ctags_bin='/home/shaiya/tools/bin/ctags'
+nmap , :TagbarToggle<cr>
+
+"Plugin 'scrooloose/nerdtree'
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+let NERDTreeWinPos='right'
+let NERDTreeWinSize=48
+let NERDTreeShowLineNumbers=0
+let NERDTreeShowBookmarks=1
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
+"nmap . :NERDTreeToggle<CR> "use NERDTreeTabsToggle to manager for all tabs
+
+"Plugin 'jistr/vim-nerdtree-tabs'
+map . <plug>NERDTreeTabsToggle<CR>
+map <leader>. <plug>NERDTreeFocusToggle<CR>
+
+"Plugin 'Xuyuanp/nerdtree-git-plugin'
+let g:NERDTreeIndicatorMapCustom = {
+    \ "Modified"  : "✹",
+    \ "Staged"    : "✚",
+    \ "Untracked" : "✭",
+    \ "Renamed"   : "➜",
+    \ "Unmerged"  : "═",
+    \ "Deleted"   : "✖",
+    \ "Dirty"     : "✗",
+    \ "Clean"     : "✔︎",
+    \ 'Ignored'   : '☒',
+    \ "Unknown"   : "?"
+    \ }
+
+"Plugin 'scrooloose/nerdcommenter'
+"\ca(switch alternative delimiter),\cb(line or selected line comment),\cc(line or selected block comment),\cm(block comment use one /**/),\cu(uncomment),\cA(append comment end of line),\cs(style comment), more see :h nerdcommenter or :map
+let g:NERDSpaceDelims = 1				" Add spaces after comment delimiters by default
+let g:NERDCompactSexyComs = 1			" Use compact syntax for prettified multi-line comments
+let g:NERDDefaultAlign = 'both' 		" Align line-wise comment delimiters flush left instead of following code indentation
+let g:NERDTrimTrailingWhitespace = 1	" Enable trimming of trailing whitespace when uncommenting
+let g:NERDToggleCheckAllLines = 1		" Enable NERDCommenterToggle(\c<space>) to check all selected lines is commented or not
+let NERDLPlace="/*"						" Specifies what to use as the left delimiter placeholder when nesting comments.
+let NERDRPlace="*/"						" Specifies what to use as the left delimiter placeholder when nesting comments.
+
+"Plugin 'vim-airline/vim-airline' | Plugin 'vim-airline/vim-airline-themes'
+":AirlineExtensions can list extensions of supported and current loaded
+let g:airline_theme='base16_summerfruit' "base16_colors, see :h airline-themes-list for more information
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+let b:airline_whitespace_disabled = 1
+" let g:airline_section_c = expand("%:p")."    ".strftime("%Y/%m/%d %T", getftime(expand("%:p"))) "can not refresh
+" let g:airline_section_c = '%<%f%m'
+let g:airline_powerline_fonts = 1	"need install fonts: sudo apt-get install fonts-powerline or git clone https://github.com/powerline/fonts.git --depth=1 && cd fonts && ./install.sh && mkdir ~/.config/fontconfig/conf.d/ -p && cp fontconfig/50-enable-terminess-powerline.conf ~/.config/fontconfig/conf.d/ && fc-cache -vf && cd .. && rm -rf fonts
+if !exists('g:airline_symbols')
+	let g:airline_symbols = {}
+	" powerline symbols
+	let g:airline_left_sep = ''
+	let g:airline_left_alt_sep = ''
+	let g:airline_right_sep = ''
+	let g:airline_right_alt_sep = ''
+	let g:airline_symbols.branch = '⎇'
+	let g:airline_symbols.readonly = ''
+	let g:airline_symbols.linenr = '☰'
+	" let g:airline_symbols.maxlinenr = ''
+	let g:airline_symbols.maxlinenr = ' '
+endif
+
+"Plugin 'ctrlpvim/ctrlp.vim' <c-p>? for help
+let g:ctrlp_map = '<c-p>'
+let g:ctrlp_cmd = 'CtrlPLastMode'
+let g:ctrlp_working_path_mode = 'ra'
+let g:ctrlp_root_markers = ['tags', 'cscope.out']
+let g:ctrlp_by_filename = 1		"<c-d> switch whether match directory
+let g:ctrlp_regexp = 1		"<c-r> switch whether match use regexp
+let g:ctrlp_match_window = 'bottom,order:ttb,min:1,max:10,results:50'
+let g:ctrlp_switch_buffer = 'et'
+let g:ctrlp_types = ['mru', 'buf', 'fil']	"<c-b>/<c-f>/<c-up>/<c-down> switch search mode
+" let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
+
+"Plugin 'airblade/vim-gitgutter'
+nmap <Space>t :GitGutterToggle<cr>
+nmap git :GitGutterToggle<cr>
+nmap gits :GitGutterLineHighlightsToggle<cr>
+nmap gitd <Plug>GitGutterPreviewHunk
+nmap gp <Plug>GitGutterPrevHunk
+nmap gn <Plug>GitGutterNextHunk
+set updatetime=100
+
+"Plugin 'SirVer/ultisnips'
+let g:UltiSnipsExpandTrigger="<c-k>"	"<tab>/<c-i> be used to insert a \t character
+let g:UltiSnipsListSnippets="<c-l>"
+let g:UltiSnipsJumpForwardTrigger="<c-f>"
+let g:UltiSnipsJumpBackwardTrigger="<c-b>"
+let g:UltiSnipsSnippetDirectories=["UltiSnips", "."] "custom all.snippets in root of runtimepath: .vim/
+let g:snips_author= "Huanhuan Zhuang"
+let g:snips_email = "yourname@email.com"
+
+"Plugin 'wesleyche/SrcExpl'
+nmap <S-F8> :SrcExplToggle<cr>
+let g:SrcExpl_prevDefKey = "<S-F5>"    "Set \"<S-F5>\" key for displaying the previous definition in the jump list
+let g:SrcExpl_nextDefKey = "<S-F6>"    "Set \"<S-F6>\" key for displaying the next definition in the jump list
+let g:SrcExpl_updateTagsKey = "<S-F7>"    "Set \"<S-F7>\" key for updating the tags file artificially
+let g:SrcExpl_winHeight = 8    "Set the height of Source Explorer window
+let g:SrcExpl_refreshTime = 100    "Set 100 ms for refreshing the Source Explorer
+let g:SrcExpl_jumpKey = "<cr>"    "Set \"Enter\" key to jump into the exact definition context
+let g:SrcExpl_gobackKey = "<Space>"    "Set \"Space\" key for back from the definition context
+"In order to avoid conflicts, the Source Explorer should know what plugins, except itself are using buffers. And you need add their buffer names into below listaccording to the command ':buffers!'
+let g:SrcExpl_pluginList = [
+\ "__Tagbar__.*",
+\ "__Tag_List__",
+\ "NERD_tree_.*",
+\ "ControlP",
+\ "Source_Explorer"
+\ ]
+let g:SrcExpl_searchLocalDef = 1    "Enable/Disable the local definition searching, and note that this is not guaranteed to work, the Source Explorer doesn't check the syntax for now. It only searches for a match with the keyword according to command 'gd'
+let g:SrcExpl_isUpdateTags = 0    "Do not let the Source Explorer update the tags file when opening
+let g:SrcExpl_updateTagsCmd = "tag -u&"    "$HOME/tools/bin/tag script(write for me) is setting: 'ctags -R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+ia --extra=+q -L cscope.files' and 'cscope -bkq -i \"cscope.files\"'
+" ----------------------------- Vundle Plugin Manager End -------------------------------
+
+" -------------------------------- Common Utils Start -----------------------------------
+func JumpStack_Begin()
+    let t:JumpStack_Cur = [expand("%:p"), line("."), col(".")]
+endfunc
+
+func JumpStack_Done()
+	if !exists('t:JumpStack_Cur')
+		return
+	endif
+	if !exists('t:JumpStack_List')
+		let t:JumpStack_List = []
+	endif
+    if len(t:JumpStack_List)
+		if get(t:JumpStack_List, -1)[0] == t:JumpStack_Cur[0]
+				\ && get(t:JumpStack_List, -1)[1] == t:JumpStack_Cur[1]
+				\ && get(t:JumpStack_List, -1)[2] == t:JumpStack_Cur[2]
+			return
+		endif
+	endif
+	call add(t:JumpStack_List, t:JumpStack_Cur)
+endfunc
+
+func JumpStack_GoBack()
+	if !exists('t:JumpStack_List')
+		let t:JumpStack_List = []
+	endif
+    if !len(t:JumpStack_List)
+		echohl ErrorMsg
+		echo "Jump Stack is empty"
+		echohl None
+        return -1
+    endif
+
+    " If the cursor is not in the valid edit window
+	if JumpWinInvalid()
+		echohl ErrorMsg
+		echo "Jump Window is invalid"
+		echohl None
+		return -1
+	endif
+
+    " Load the buffer content into the edit window
+    exe "edit " . get(t:JumpStack_List, -1)[0]
+    call cursor(get(t:JumpStack_List, -1)[1], get(t:JumpStack_List, -1)[2])
+    call remove(t:JumpStack_List, -1)
+	return 0
+endfunc
+
+autocmd BufWinEnter * if &buftype ==# 'quickfix' | let s:quickfixIsOpen = 1 | endif
+func QuickfixWinToggle()
+	if !exists("s:quickfixIsOpen") || s:quickfixIsOpen == 0
+		exec ":bo copen"
+	else
+		exec ":cclose"
+		let s:quickfixIsOpen = 0
+	endif
+endfunc
+
+func QuickfixWinCleanClose()
+	call setqflist([], "r")
+	exec ":cclose"
+	let s:quickfixIsOpen = 0
+endfunc
+
+let g:JumpDisableWinList = [
+\ "__Tagbar__.*",
+\ "__Tag_List__",
+\ "NERD_tree_.*",
+\ "ControlP",
+\ "Source_Explorer"
+\ ]
+" Aslo sync to g:SrcExpl_pluginList
+let g:SrcExpl_pluginList = deepcopy(g:JumpDisableWinList)
+func JumpWinInvalid()
+	for item in g:JumpDisableWinList
+		if bufname("%") =~# item
+			return -1
+		endif
+	endfor
+	" Aslo filter the Quickfix window
+	if &buftype ==# "quickfix"
+		return -1
+	endif
+	return 0
+endfunc
+
+func TagsConnectUpdate()
+	let tags_search_path = expand("%:p")
+	let tags_search_path_list = []
+	if !empty(tags_search_path)
+		"Resolve invalid path, eg.: ../a/../.. , a not exists or no permission to access
+		while !isdirectory(tags_search_path)
+			let tags_search_path = GetPathParent(tags_search_path)
+		endwhile
+		"Convert path with .. to absolute path
+		let tags_search_path = system("cd ".tags_search_path." && echo -n $PWD")
+	endif
+	"No Permission to loading directory"
+	if empty(tags_search_path) || !isdirectory(tags_search_path)
+		let tags_search_path = getcwd()
+	endif
+	let parent = tags_search_path
+	"Not include root directory(/)
+	while parent != "/"
+		call add(tags_search_path_list, parent)
+		let parent = GetPathParent(parent)
+	endwhile
+	if empty(tags_search_path_list)
+		return
+	endif
+	let tags_ctags_list = []
+	let tags_cscope_list = []
+	for item in tags_search_path_list
+		if filereadable(item."/tags")
+			call add(tags_ctags_list, item."/tags")
+		endif
+		if filereadable(item."/cscope.out")
+			call add(tags_cscope_list, item."/cscope.out")
+		endif
+	endfor
+	for item in tags_ctags_list
+		exec "set tags+=".item
+	endfor
+	for item in tags_cscope_list
+		exec "cs add ".item
+	endfor
+endfunc
+
+func TagsFileUpdate()
+  " If the cursor is not in the valid file window
+	if JumpWinInvalid()
+		echohl ErrorMsg
+		echo "Invalid file"
+		echohl None
+		return -1
+	endif
+
+    let tag_connected_list = tagfiles()
+	if !len(tag_connected_list)
+		echohl ErrorMsg
+		echo "No TAG files found"
+		echohl None
+	else
+		let file_src = expand('%:p:h')
+		for item in tag_connected_list
+			let tag_scope=item[:-6]."/cscope.files"
+			if filereadable(tag_scope) && len(system("grep \'".file_src."\' ".tag_scope))
+				let tmp = getcwd()
+				silent! exe "cd " . item[:-6]
+				call system("tag -u")
+				echo "[  update  ]  ".item[:-6]
+				silent! exe "cd " .tmp
+				silent! exe "cs reset"
+			else
+				echo "[non-update]  ".item[:-6]
+			endif
+		endfor
+	endif
+endfunc
+
+func GetPathParent(path)
+	let parent = substitute(a:path, '[\/][^\/]\+[\/:]\?$', '', '')
+	if parent == '' || parent !~ '[\/]'
+		let parent .= '/'
+	en
+	retu parent
+endfunc
+
+func HelpCmdString(mode, cmd, comment)
+	if a:mode ==? "COMMON"
+		echoh Visual | echo printf("[%.6s]", a:mode)
+	elseif a:mode ==? "NORMAL"
+		echoh Statement | echo printf("[%.6s]", a:mode)
+	elseif a:mode ==? "INSERT"
+		echoh Special | echo printf("[%.6s]", a:mode)
+	elseif a:mode ==? "NONE-I"
+		echoh ColorColumn | echo printf("[%.6s]", a:mode)
+	else
+		echoh Visual | echo printf("[%.6s]", a:mode)
+	endif
+	echoh Constant | echon printf(" %-20s ", a:cmd)
+	echoh Comment | echon a:comment
+	echoh None
+endfunc
+func HelpCmdInfo()
+	call HelpCmdString("NORMAL", "<C-F1>", "Show this message for key map information, detail map information see :map command")
+
+	echoh Comment | echo "mouse mode setting" | echoh None
+	call HelpCmdString("COMMON", "<s-z>", "set mouse=nvih")
+	call HelpCmdString("COMMON", "<s-x>", "set mouse=v")
+
+	echoh Comment | echo "fold setting" | echoh None
+	call HelpCmdString("NORMAL", "<Space>r", "set fdc=1/0")
+
+	echoh Comment | echo "block select setting" | echoh None
+	call HelpCmdString("NORMAL", "<Space>q", "vab: from ( to the matching )")
+	call HelpCmdString("NORMAL", "<Space>w", "vaB: from { to the matching }")
+	call HelpCmdString("NORMAL", "<Space>e", "v% : smart matching {()}")
+
+	echoh Comment | echo "window setting" | echoh None
+	call HelpCmdString("COMMON", "<A-LEFT>", "move cursor to left window")
+	call HelpCmdString("COMMON", "<A-RIGHT>", "move cursor to right window")
+	call HelpCmdString("COMMON", "<A-UP>", "move cursor to above window")
+	call HelpCmdString("COMMON", "<A-DOWN>", "move cursor to below window")
+	call HelpCmdString("COMMON", "<S-A-LEFT>", "Decrease current window width")
+	call HelpCmdString("COMMON", "<S-A-RIGHT>", "Increase current window width")
+	call HelpCmdString("COMMON", "<S-A-UP>", "Increase current window height")
+	call HelpCmdString("COMMON", "<S-A-DOWN>", "Decrease current window height")
+	call HelpCmdString("COMMON", "<C-W><C-x/H/J/K/L>", "exchange window with next/left/below/above/right")
+	call HelpCmdString("COMMON", "<C-W><C-s/v>", "split window vertically/horizontally")
+
+	echoh Comment | echo "tab page setting" | echoh None
+	call HelpCmdString("NORMAL", "<C-PageUp>", "switch to previous tab page")
+	call HelpCmdString("NORMAL", "<C-PageDown>", "switch to next tab page")
+	call HelpCmdString("NORMAL", "<S-,>", "exchange tab page with previous")
+	call HelpCmdString("NORMAL", "<S-.>", "exchange tab page with next")
+
+	echoh Comment | echo "search setting" | echoh None
+	call HelpCmdString("NONE-I", "<F2>", "search this or selected pattern")
+	call HelpCmdString("NONE-I", "<F3>", "search all of this or selected pattern in current file and list results in Quickfix window")
+	call HelpCmdString("NONE-I", "<F4>", "recursive search all of this or selected pattern below current directory and list results in Quickfix window")
+
+	echoh Comment | echo "Quickfix window setting" | echoh None
+	call HelpCmdString("NORMAL", "<F5>", "Jump to Quickfix next item")
+	call HelpCmdString("NORMAL", "<F6>", "Jump to Quickfix previous item")
+	call HelpCmdString("NORMAL", "<F7>", "clean Quickfix list and Close and JumpBack")
+	call HelpCmdString("NORMAL", "<F8>", "Toggle Quickfix window")
+
+	echoh Comment | echo "TAGS file setting" | echoh None
+	call HelpCmdString("NORMAL", "<leader>t", "Update TAG files associated with current edit file artificially")
+
+	echoh Comment | echo "VIM tags setting" | echoh None
+	call HelpCmdString("NONE-I", "<C-]>", "list definition and Put it in the tag stack")
+	call HelpCmdString("NORMAL", "<C-l>", "list definition of current tag")
+	call HelpCmdString("NORMAL", "<C-t>", "JumpBack and Pop current tag out the tag stack")
+	call HelpCmdString("NONE-I", "g<LeftMouse>", "Same as <C-]>")
+	call HelpCmdString("NORMAL", "<c-b>", "Jump to current tag previous definition")
+	call HelpCmdString("NORMAL", "<c-f>", "Jump to current tag next definition")
+
+	echoh Comment | echo "VIM cscope setting" | echoh None
+	call HelpCmdString("NONE-I", "fs/frs", "Find C symbol and list results in Quickfix window")
+	call HelpCmdString("NONE-I", "fg/frg", "Find definition")
+	call HelpCmdString("NONE-I", "fc/frc", "Find functions calling this function and list results in Quickfix window")
+	call HelpCmdString("NONE-I", "fi/fri", "Find files #including this file and list results in Quickfix window")
+	call HelpCmdString("NONE-I", "ff/frf", "Find this file and list results in Quickfix window")
+	call HelpCmdString("NONE-I", "ft/frt", "Find text string and list results in Quickfix window")
+	call HelpCmdString("NONE-I", "fe/fre", "Find egrep pattern and list results in Quickfix window")
+
+	echoh Comment | echo "Vundle Plugin Manager setting" | echoh None
+	call HelpCmdString("NORMAL", "<F9>", "Vundle PluginSearch")
+	call HelpCmdString("NORMAL", "<S-F9>", "Vundle PluginClean")
+	call HelpCmdString("NORMAL", "<F10>", "Vundle PluginInstall")
+	call HelpCmdString("NORMAL", "<S-F10>", "Vundle PluginUpdate")
+	call HelpCmdString("NORMAL", "<F12>", "Vundle Help information")
+
+	echoh Comment | echo "Color Mark setting" | echoh None
+	call HelpCmdString("NONE-I", "\\m or \\r", "mark and unmark pattern with different color")
+	call HelpCmdString("NORMAL", "\\c", "unmark all marked pattern")
+	call HelpCmdString("NORMAL", "\\5", "show bracket with different color")
+
+	echoh Comment | echo "Block or Line Comment setting, more information see :h nerdcommenter or :map" | echoh None
+	call HelpCmdString("NONE-I", "\ca", "switch alternative delimiter")
+	call HelpCmdString("NONE-I", "\cb", "line or selected line comment")
+	call HelpCmdString("NONE-I", "\cc", "line or selected block comment")
+	call HelpCmdString("NONE-I", "\cm", "block comment use one /**/")
+	call HelpCmdString("NONE-I", "\cu", "uncomment")
+	call HelpCmdString("NONE-I", "\cA", "append comment end of line")
+	call HelpCmdString("NONE-I", "\cs", "style comment")
+
+	echoh Comment | echo "Auto complete Pop setting" | echoh None
+	call HelpCmdString("INSERT", "<C-p>", "trigger complete popmenu")
+
+	echoh Comment | echo "TAGS list setting" | echoh None
+	call HelpCmdString("NORMAL", ",", "Tagbar Toggle")
+
+	echoh Comment | echo "File explorer setting" | echoh None
+	call HelpCmdString("NONE-I", ".", "NERDTree Toggle")
+	call HelpCmdString("NONE-I", "<leader>.", "NERDTree Focus Toggle")
+
+	echoh Comment | echo "CtrlP plugin setting" | echoh None
+	call HelpCmdString("NORMAL", "<C-p>", "load CtrlP for file searching, ? for help")
+
+	echoh Comment | echo "Git Plugin setting" | echoh None
+	call HelpCmdString("NORMAL", "<Space>t", "Git status column toggle")
+	call HelpCmdString("NORMAL", "git", "Git Plugin Enable or Disable")
+	call HelpCmdString("NORMAL", "gits", "Highlight changed line")
+	call HelpCmdString("NORMAL", "gitd", "Show detail change in Preview window")
+	call HelpCmdString("NORMAL", "gp", "Jump to previous change")
+	call HelpCmdString("NORMAL", "gn", "Jump to next change")
+
+	echoh Comment | echo "Snips Plugin setting" | echoh None
+	call HelpCmdString("INSERT", "<C-k>", "Trigger expanding a snippet")
+	call HelpCmdString("INSERT", "<C-l>", "List all matched snippets according current context")
+	call HelpCmdString("INSERT", "<C-f>", "Jump variable Forward within a snippet")
+	call HelpCmdString("INSERT", "<C-b>", "Jump variable Backward within a snippet")
+
+	echoh Comment | echo "TAGS Relation window setting" | echoh None
+	call HelpCmdString("NORMAL", "<S-F8>", "TAGS Relation window Toggle")
+	call HelpCmdString("NORMAL", "<S-F5>", "Displaying the previous definition in the relation list")
+	call HelpCmdString("NORMAL", "<S-F6>", "Displaying the next definition in the relation list")
+	call HelpCmdString("NORMAL", "<S-F7>", "Updating the TAGS file artificially, quick return from the background running, but need call :cs reset later to Reinit cscope connections")
+	call HelpCmdString("NORMAL", "<Space>", "JumpBack from the definition context")
+endfunc
+" -------------------------------- Common Utils End -------------------------------------
+
+filetype plugin indent on "last option after some plugin has run over, Enable VIM to use different plugins and indentation based on file types, HTML indent use 2 space, Python is 4
