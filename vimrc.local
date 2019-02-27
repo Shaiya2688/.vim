@@ -1,3 +1,8 @@
+if !has('win32')
+	echo "not Win32"
+	qall
+endif
+set rtp+=C:\.vim
 " ----------------------------- VIM common settings Start -----------------------------
 set nocompatible	"first option, enable VIM extended functionality based on VI
 filetype off		"Some plugins need to turn this off
@@ -10,13 +15,20 @@ set nowrap			"no wrap long line
 set nu				"view line number
 set ts=4			"set tab view size
 set ignorecase		"ignore character case
-"colorscheme desert	"may be need in the future
 set backspace=indent,eol,start	"set backspace can remove autoindent or join previous line(VI is disable)
 set showmatch		"when a bracket is inserted, briefly jump to the matching one if the match can be seen on the screen.
+if has("vms") || has('Win32')
+	set nobackup " do not keep a backup file, use versions instead
+endif
+set noundofile		"not keep undo history for re-open same file
+au guienter * simalt ~x "for gui window maximum
+
 delmarks!			"clear position of a-z marks, m{a-zA-Z} to mark position, `{a-zA-Z} or '{a-zA-Z} to jump assigned position
 let mapleader = '\'	"set defalut mapleader to use to keymap
 set ttimeoutlen=50	"The time in milliseconds that is waited for a key code or mapped key sequence to complete.
 set t_Co=256		"Color setting, force Vim into 256 color mode to bypass the automatic detection of terminal colors
+" colorscheme desert	"may be need in the future
+hi normal guibg=#EFFFEF	"set GUI background colors
 
 "Help key map for show defined commands"
 nmap <C-F1> :call HelpCmdInfo()<cr>
@@ -32,6 +44,7 @@ hi cursorline cterm=NONE ctermbg=lightgray "cursor line background color
 
 "mouse mode setting
 set mouse=nvih
+"set mouseshape=n-i-ve:beam
 map <s-z> :set<Space>mouse=nvih<cr>
 map <s-x> :set<Space>mouse=v<cr>
 
@@ -50,8 +63,8 @@ hi DiffChange cterm=NONE ctermbg=7
 hi DiffText cterm=NONE ctermbg=7 ctermfg=1
 
 "file format setting for <EOL> define
-set fileformat=unix
-set fileformats=unix,dos
+set fileformat=dos
+set fileformats=dos,unix
 
 "file encode setting
 set encoding=utf-8
@@ -60,8 +73,12 @@ if v:lang =~ "utf8$" || v:lang =~ "utf-8$"
   set fencs=utf-8,ucs-bom,latin1
 endif
 
+"gui menu Setting
+source $VIMRUNTIME/delmenu.vim
+source $VIMRUNTIME/menu.vim
+
 "font setting
-"set guifont=Courier_New:h11:cANSI
+set guifont=Consolas:h10
 "set guifontwide=新宋体:h11:cGB2312
 
 "help language setting
@@ -79,8 +96,8 @@ hi Folded term=standout cterm=NONE ctermbg=7 ctermfg=4
 
 "popmenu setting
 set completeopt=longest,menu ",preview
-hi Pmenu ctermfg=0 ctermbg=7
-hi PmenuSel cterm=bold ctermfg=0 ctermbg=2
+hi Pmenu ctermfg=0 ctermbg=7 guibg=#D3D3D3 guifg=#000000
+hi PmenuSel cterm=bold ctermfg=0 ctermbg=2 guibg=#2E8B57 guifg=#000000
 
 "common shortcuts setting ,help keycodes fot more information
 vmap <C-c> y
@@ -121,7 +138,8 @@ nn <F4> :call JumpStack_Begin()<cr>/<C-r><C-w><cr>:vimgrep<Space>/<C-r>//<Space>
 nn <F5> :if !JumpWinInvalid()\|cp\|endif<cr>
 nn <F6> :if !JumpWinInvalid()\|cn\|endif<cr>
 nn <F7> :call QuickfixWinCleanClose()<cr>:call JumpStack_GoBack()<cr>
-nn <F8> :call QuickfixWinToggle()<cr>
+"<F8> Invalid in windows
+nn <C-F8> :call QuickfixWinToggle()<cr>
 
 "TAGS file setting
 "auto loading tags and cscope.out
@@ -138,7 +156,7 @@ nn <c-f> :tn<cr>
 set autochdir "$PWD is auto change to directory of jump
 
 "VIM cscope setting
-"for quickfix use <F5> to search previous, <F6> to search next, <F7> to go back search, <F8> to toggle quickfix window
+"for quickfix use <F5> to search previous, <F6> to search next, <F7> to go back search, <C-F8> to toggle quickfix window
 " set csprg=$HOME/tools/bin/cscope
 set cscopequickfix=s-,g0,c-,i-,f-,t-,e-,d- "+: appended to quickfix window; -: clear previous results and add to quickfix window; 0 or unset: don't use quickfix. warning: quickfix no jump stack
 set cst "use the commands :cstag instead of the default :tag behavior.
@@ -190,8 +208,8 @@ endfunc
 " ----------------------------- VIM common settings End -------------------------------
 
 " ----------------------------- Vundle Plugin Manager Start -----------------------------
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+set rtp+=C:\.vim\bundle\Vundle.vim
+call vundle#begin('C:\.vim\bundle\Vundle.vim\plugins')
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'inkarkat/vim-mark' | Plugin 'inkarkat/vim-ingo-library' "vim-mark required
 Plugin 'Shaiya2688/bracket-highlight'
@@ -205,9 +223,10 @@ Plugin 'AutoComplPop'
 Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'		"extended nerdtree for all tabs
+"TODO review Invalid in Windows
 Plugin 'Xuyuanp/nerdtree-git-plugin'	"extended git status in nerdtree
 Plugin 'scrooloose/nerdcommenter'		"section comment and uncomment
-Plugin 'vim-airline/vim-airline' | Plugin 'vim-airline/vim-airline-themes'
+Plugin 'vim-airline/vim-airline' | Plugin 'vim-airline/vim-airline-themes' | Plugin 'Shaiya2688/consolas-font-for-powerline'
 Plugin 'ctrlpvim/ctrlp.vim'	"file search and buffer manager
 Plugin 'airblade/vim-gitgutter'	"or Plugin 'mhinz/vim-signify'
 Plugin 'SirVer/ultisnips' | Plugin 'honza/vim-snippets'	"Common useful snippets for the ultisnips engine.
@@ -228,10 +247,10 @@ hi MarkWord3 ctermfg=0 ctermbg=3 guifg=Black guibg=#FFDB72
 hi MarkWord4 ctermfg=0 ctermbg=1 guifg=Black guibg=#FF7272
 hi MarkWord5 ctermfg=0 ctermbg=5 guifg=Black guibg=#FFB3FF
 hi MarkWord6 cterm=bold ctermfg=7 ctermbg=4 guifg=Black guibg=#9999FF
-hi MarkWord7 cterm=bold ctermfg=3 ctermbg=7 guifg=Black guibg=#9999FF
-hi MarkWord8 cterm=bold ctermfg=7 ctermbg=1 guifg=Black guibg=#9999FF
-hi MarkWord9 cterm=bold ctermfg=3 ctermbg=2 guifg=Black guibg=#9999FF
-hi MarkWord10 cterm=bold ctermfg=7 ctermbg=6 guifg=Black guibg=#9999FF
+hi MarkWord7 cterm=bold ctermfg=3 ctermbg=7 guifg=Black guibg=#80FFFF
+hi MarkWord8 cterm=bold ctermfg=7 ctermbg=1 guifg=Black guibg=#80FF80
+hi MarkWord9 cterm=bold ctermfg=3 ctermbg=2 guifg=Black guibg=#808000
+hi MarkWord10 cterm=bold ctermfg=7 ctermbg=6 guifg=Black guibg=#D2D200
 "to add more in this order....
 "use \m or \r to mark and unmark
 nmap \c :MarkClear<cr>
@@ -243,7 +262,7 @@ let g:rainbow_conf = {
 	\	'cterms': ['NONE', 'NONE', 'NONE', 'NONE', 'NONE', 'bold', 'bold', 'bold', 'bold', 'bold'],
 	\	'ctermbgs': ['6', '2', '3', '1', '5', '4', '7', '1', '2', '6'],
 	\	'ctermfgs': ['0', '0', '0', '0', '0', '7', '3', '7', '3', '7'],
-	\	'guibgs': ['#8CCBEA', '#A4E57E', '#FFDB72', '#FF7272', '#FFB3FF', '#9999FF', '#9999FF', '#9999FF', '#9999FF', '#9999FF'],
+	\	'guibgs': ['#8CCBEA', '#A4E57E', '#FFDB72', '#FF7272', '#FFB3FF', '#9999FF', '#80FFFF', '#80FF80', '#808000', '#D2D200'],
 	\	'guifgs': ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
 	\	'operators': '',
 	\	'parentheses': ['start=/(/ end=/)/ fold', 'start=/\[/ end=/\]/ fold', 'start=/{/ end=/}/ fold'],
@@ -329,14 +348,15 @@ let g:tagbar_autoclose = 0
 let g:tagbar_autofocus = 1
 let g:tagbar_autoshowtag = 0
 let g:tagbar_previewwin_pos = 'bo'
+"TODO join ctags&cscope in SYSTEM PATH environment
 ""let g:tagbar_ctags_bin='/usr/bin/ctags'
 ""let g:tagbar_ctags_bin='/home/shaiya/tools/bin/ctags'
 nmap , :TagbarToggle<cr>
 
 "Plugin 'scrooloose/nerdtree'
 autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
+" autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+" autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 let NERDTreeWinPos='right'
 let NERDTreeWinSize=48
@@ -352,17 +372,17 @@ map <leader>. <plug>NERDTreeFocusToggle<CR>
 
 "Plugin 'Xuyuanp/nerdtree-git-plugin'
 let g:NERDTreeIndicatorMapCustom = {
-    \ "Modified"  : "✹",
-    \ "Staged"    : "✚",
-    \ "Untracked" : "✭",
-    \ "Renamed"   : "➜",
-    \ "Unmerged"  : "═",
-    \ "Deleted"   : "✖",
-    \ "Dirty"     : "✗",
-    \ "Clean"     : "✔︎",
-    \ 'Ignored'   : '☒',
-    \ "Unknown"   : "?"
-    \ }
+	\ "Modified"  : "✹",
+	\ "Staged"    : "✚",
+	\ "Untracked" : "✭",
+	\ "Renamed"   : "➜",
+	\ "Unmerged"  : "═",
+	\ "Deleted"   : "✖",
+	\ "Dirty"     : "✗",
+	\ "Clean"     : "✔︎",
+	\ 'Ignored'   : '☒',
+	\ "Unknown"   : "?"
+	\ }
 
 "Plugin 'scrooloose/nerdcommenter'
 "\ca(switch alternative delimiter),\cb(line or selected line comment),\cc(line or selected block comment),\cm(block comment use one /**/),\cu(uncomment),\cA(append comment end of line),\cs(style comment), more see :h nerdcommenter or :map
@@ -374,26 +394,39 @@ let g:NERDToggleCheckAllLines = 1		" Enable NERDCommenterToggle(\c<space>) to ch
 let NERDLPlace="/*"						" Specifies what to use as the left delimiter placeholder when nesting comments.
 let NERDRPlace="*/"						" Specifies what to use as the left delimiter placeholder when nesting comments.
 
-"Plugin 'vim-airline/vim-airline' | Plugin 'vim-airline/vim-airline-themes'
+"Plugin 'vim-airline/vim-airline' | Plugin 'vim-airline/vim-airline-themes' | Plugin 'Shaiya2688/consolas-font-for-powerline'
 ":AirlineExtensions can list extensions of supported and current loaded
 let g:airline_theme='base16_summerfruit' "base16_colors, see :h airline-themes-list for more information
 let g:airline#extensions#tabline#formatter = 'unique_tail'
 let b:airline_whitespace_disabled = 1
-" let g:airline_section_c = expand("%:p")."    ".strftime("%Y/%m/%d %T", getftime(expand("%:p"))) "can not refresh
-" let g:airline_section_c = '%<%f%m'
-let g:airline_powerline_fonts = 1	"need install fonts: sudo apt-get install fonts-powerline or git clone https://github.com/powerline/fonts.git --depth=1 && cd fonts && ./install.sh && mkdir ~/.config/fontconfig/conf.d/ -p && cp fontconfig/50-enable-terminess-powerline.conf ~/.config/fontconfig/conf.d/ && fc-cache -vf && cd .. && rm -rf fonts
+let g:airline_powerline_fonts = 0	"need install fonts: C:\.vim\bundle\Vundle.vim\plugins\consolas-font-for-powerline\*, you can select more fonts from git clone https://github.com/powerline/fonts.git and set guifont="font name"
 if !exists('g:airline_symbols')
 	let g:airline_symbols = {}
-	" powerline symbols
+endif
+" powerline symbols
+if exists('g:airline_powerline_fonts') && g:airline_powerline_fonts == 1
+	set guifont=Powerline\ Consolas:h10
 	let g:airline_left_sep = ''
 	let g:airline_left_alt_sep = ''
 	let g:airline_right_sep = ''
 	let g:airline_right_alt_sep = ''
-	let g:airline_symbols.branch = '⎇'
+	let g:airline_symbols.branch = ''
 	let g:airline_symbols.readonly = ''
 	let g:airline_symbols.linenr = '☰'
 	" let g:airline_symbols.maxlinenr = ''
+	" let g:airline_symbols.maxlinenr = 'Ln'
 	let g:airline_symbols.maxlinenr = ' '
+else
+	let g:airline_left_sep = ''
+	let g:airline_right_sep = ''
+	let g:airline_symbols.crypt = '🔒'
+	let g:airline_symbols.linenr = '☰'
+	let g:airline_symbols.maxlinenr = '㏑'
+	let g:airline_symbols.branch = 'b'
+	let g:airline_symbols.paste = 'Þ'
+	let g:airline_symbols.spell = 'Ꞩ'
+	let g:airline_symbols.notexists = 'Ɇ'
+	let g:airline_symbols.whitespace = 'Ξ'
 endif
 
 "Plugin 'ctrlpvim/ctrlp.vim' <c-p>? for help
@@ -445,7 +478,7 @@ let g:SrcExpl_pluginList = [
 \ ]
 let g:SrcExpl_searchLocalDef = 1    "Enable/Disable the local definition searching, and note that this is not guaranteed to work, the Source Explorer doesn't check the syntax for now. It only searches for a match with the keyword according to command 'gd'
 let g:SrcExpl_isUpdateTags = 0    "Do not let the Source Explorer update the tags file when opening
-let g:SrcExpl_updateTagsCmd = "tag -u&"    "$HOME/tools/bin/tag script(write for me) is setting: 'ctags -R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+ia --extra=+q -L cscope.files' and 'cscope -bkq -i \"cscope.files\"'
+let g:SrcExpl_updateTagsCmd = "tag /u"    "$HOME/tools/bin/tag script(write for me) is setting: 'ctags -R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+ia --extra=+q -L cscope.files' and 'cscope -bkq -i \"cscope.files\"'
 " ----------------------------- Vundle Plugin Manager End -------------------------------
 
 " -------------------------------- Common Utils Start -----------------------------------
@@ -517,7 +550,8 @@ let g:JumpDisableWinList = [
 \ "__Tag_List__",
 \ "NERD_tree_.*",
 \ "ControlP",
-\ "Source_Explorer"
+\ "Source_Explorer",
+\ ".*\.txt",
 \ ]
 " Aslo sync to g:SrcExpl_pluginList
 let g:SrcExpl_pluginList = deepcopy(g:JumpDisableWinList)
@@ -535,6 +569,9 @@ func JumpWinInvalid()
 endfunc
 
 func TagsConnectUpdate()
+	if JumpWinInvalid()
+		return
+	endif
 	let tags_search_path = expand("%:p")
 	let tags_search_path_list = []
 	if !empty(tags_search_path)
@@ -542,8 +579,8 @@ func TagsConnectUpdate()
 		while !isdirectory(tags_search_path)
 			let tags_search_path = GetPathParent(tags_search_path)
 		endwhile
-		"Convert path with .. to absolute path
-		let tags_search_path = system("cd ".tags_search_path." && echo -n $PWD")
+		"Convert path with .. to absolute path, Windows pass
+		" let tags_search_path = system("cd ".tags_search_path." && echo -n $PWD")
 	endif
 	"No Permission to loading directory"
 	if empty(tags_search_path) || !isdirectory(tags_search_path)
@@ -551,7 +588,9 @@ func TagsConnectUpdate()
 	endif
 	let parent = tags_search_path
 	"Not include root directory(/)
-	while parent != "/"
+	"regexp compare error in Windows
+	" while parent !~ "^.:\\$"
+	while strlen(parent) > 3
 		call add(tags_search_path_list, parent)
 		let parent = GetPathParent(parent)
 	endwhile
@@ -561,13 +600,14 @@ func TagsConnectUpdate()
 	let tags_ctags_list = []
 	let tags_cscope_list = []
 	for item in tags_search_path_list
-		if filereadable(item."/tags")
-			call add(tags_ctags_list, item."/tags")
+		if filereadable(item."\\tags")
+			call add(tags_ctags_list, item."\\tags")
 		endif
-		if filereadable(item."/cscope.out")
-			call add(tags_cscope_list, item."/cscope.out")
+		if filereadable(item."\\cscope.out")
+			call add(tags_cscope_list, item."\\cscope.out")
 		endif
 	endfor
+	"TODO bad if path has whitespace
 	for item in tags_ctags_list
 		exec "set tags+=".item
 	endfor
@@ -576,6 +616,7 @@ func TagsConnectUpdate()
 	endfor
 endfunc
 
+"TODO re-support tag command and cscope tools
 func TagsFileUpdate()
   " If the cursor is not in the valid file window
 	if JumpWinInvalid()
@@ -593,11 +634,11 @@ func TagsFileUpdate()
 	else
 		let file_src = expand('%:p:h')
 		for item in tag_connected_list
-			let tag_scope=item[:-6]."/cscope.files"
-			if filereadable(tag_scope) && len(system("grep \'".file_src."\' ".tag_scope))
+			let tag_scope=item[:-6]."\\cscope.files"
+			if filereadable(tag_scope) && len(system("findstr ".file_src." ".tag_scope))
 				let tmp = getcwd()
 				silent! exe "cd " . item[:-6]
-				call system("tag -u")
+				call system("tag /u")
 				echo "[  update  ]  ".item[:-6]
 				silent! exe "cd " .tmp
 				silent! exe "cs reset"
@@ -610,8 +651,8 @@ endfunc
 
 func GetPathParent(path)
 	let parent = substitute(a:path, '[\/][^\/]\+[\/:]\?$', '', '')
-	if parent == '' || parent !~ '[\/]'
-		let parent .= '/'
+	if parent == '' || parent !~ '[\\]'
+		let parent .= '\'
 	en
 	retu parent
 endfunc
@@ -674,7 +715,7 @@ func HelpCmdInfo()
 	call HelpCmdString("NORMAL", "<F5>", "Jump to Quickfix next item")
 	call HelpCmdString("NORMAL", "<F6>", "Jump to Quickfix previous item")
 	call HelpCmdString("NORMAL", "<F7>", "clean Quickfix list and Close and JumpBack")
-	call HelpCmdString("NORMAL", "<F8>", "Toggle Quickfix window")
+	call HelpCmdString("NORMAL", "<C-F8>", "Toggle Quickfix window")
 
 	echoh Comment | echo "TAGS file setting" | echoh None
 	call HelpCmdString("NORMAL", "<leader>t", "Update TAG files associated with current edit file artificially")
