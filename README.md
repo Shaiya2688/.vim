@@ -1,4 +1,4 @@
-# .vim
+# .vim(Gvim on Win32 please see master-gui:README.md)
 
 ## Installation
 1. Clone .vim:
