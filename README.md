@@ -2,7 +2,8 @@
 
 ## Installation
 1. Clone .vim:
-*	git clone https://github.com/Shaiya2688/.vim C:\.vim
+*	a. git clone https://github.com/Shaiya2688/.vim C:\.vim
+*	b. git checkout master-gui
 
 2. Set up Vundle:
 * 	git clone https://github.com/gmarik/Vundle.vim.git C:\.vim\bundle\Vundle.vim
