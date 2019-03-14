@@ -11,6 +11,8 @@ syntax on			"start highlighting
 set ruler			"show the cursor position all the time(VI default: off)
 set showmode		"show current mode(Vim default: on, Vi default: off)
 set showtabline=1	"show tabline for multi-tabs
+set wildmenu		"enable command line complete by use tab
+set wildmode=longest,list,full
 set nowrap			"no wrap long line
 set nu				"view line number
 set ts=4			"set tab view size
