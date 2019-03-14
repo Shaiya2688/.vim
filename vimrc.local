@@ -381,9 +381,11 @@ let g:airline#extensions#tabline#formatter = 'unique_tail'
 let b:airline_whitespace_disabled = 1
 " let g:airline_section_c = expand("%:p")."    ".strftime("%Y/%m/%d %T", getftime(expand("%:p"))) "can not refresh
 " let g:airline_section_c = '%<%f%m'
-let g:airline_powerline_fonts = 1	"need install fonts: sudo apt-get install fonts-powerline or git clone https://github.com/powerline/fonts.git --depth=1 && cd fonts && ./install.sh && mkdir ~/.config/fontconfig/conf.d/ -p && cp fontconfig/50-enable-terminess-powerline.conf ~/.config/fontconfig/conf.d/ && fc-cache -vf && cd .. && rm -rf fonts
+let g:airline_powerline_fonts = 0	"need install fonts: sudo apt-get install fonts-powerline or git clone https://github.com/powerline/fonts.git --depth=1 && cd fonts && ./install.sh && mkdir ~/.config/fontconfig/conf.d/ -p && cp fontconfig/50-enable-terminess-powerline.conf ~/.config/fontconfig/conf.d/ && fc-cache -vf && cd .. && rm -rf fonts
 if !exists('g:airline_symbols')
 	let g:airline_symbols = {}
+endif
+if exists('g:airline_powerline_fonts') && g:airline_powerline_fonts == 1
 	" powerline symbols
 	let g:airline_left_sep = ''
 	let g:airline_left_alt_sep = ''
