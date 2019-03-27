@@ -207,11 +207,12 @@ Plugin 'AutoComplPop'
 Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'		"extended nerdtree for all tabs
-Plugin 'Xuyuanp/nerdtree-git-plugin'	"extended git status in nerdtree
+Plugin 'Xuyuanp/nerdtree-git-plugin'	"extended git status in nerdtree, but git will cause VIM be slow down
 Plugin 'scrooloose/nerdcommenter'		"section comment and uncomment
 Plugin 'vim-airline/vim-airline' | Plugin 'vim-airline/vim-airline-themes'
 Plugin 'ctrlpvim/ctrlp.vim'	"file search and buffer manager
 Plugin 'airblade/vim-gitgutter'	"or Plugin 'mhinz/vim-signify'
+" Plugin 'tpope/vim-fugitive'		"indicate git branch in airline, but git will cause VIM be slow down
 Plugin 'SirVer/ultisnips' | Plugin 'honza/vim-snippets'	"Common useful snippets for the ultisnips engine.
 "Plugin 'unblevable/quick-scope' unusefull
 Plugin 'Shaiya2688/SrcExpl' "Plugin 'wesleyche/SrcExpl', A context window, fix a bug in function SrcExpl_AdaptPlugins()
@@ -337,7 +338,7 @@ nmap , :TagbarToggle<cr>
 
 "Plugin 'scrooloose/nerdtree'
 autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+" autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 let NERDTreeWinPos='right'
@@ -381,8 +382,6 @@ let NERDRPlace="*/"						" Specifies what to use as the left delimiter placehold
 let g:airline_theme='base16_summerfruit' "base16_colors, see :h airline-themes-list for more information
 let g:airline#extensions#tabline#formatter = 'unique_tail'
 let b:airline_whitespace_disabled = 1
-" let g:airline_section_c = expand("%:p")."    ".strftime("%Y/%m/%d %T", getftime(expand("%:p"))) "can not refresh
-" let g:airline_section_c = '%<%f%m'
 let g:airline_powerline_fonts = 0	"need install fonts: sudo apt-get install fonts-powerline or git clone https://github.com/powerline/fonts.git --depth=1 && cd fonts && ./install.sh && mkdir ~/.config/fontconfig/conf.d/ -p && cp fontconfig/50-enable-terminess-powerline.conf ~/.config/fontconfig/conf.d/ && fc-cache -vf && cd .. && rm -rf fonts
 if !exists('g:airline_symbols')
 	let g:airline_symbols = {}
@@ -413,6 +412,7 @@ let g:ctrlp_types = ['mru', 'buf', 'fil']	"<c-b>/<c-f>/<c-up>/<c-down> switch se
 " let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
 
 "Plugin 'airblade/vim-gitgutter'
+let g:gitgutter_enabled = 0		"disable at startup, enable git will cause VIM be slow down
 nmap <Space>t :GitGutterToggle<cr>
 nmap git :GitGutterToggle<cr>
 nmap gits :GitGutterLineHighlightsToggle<cr>
