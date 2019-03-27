@@ -226,11 +226,12 @@ Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'		"extended nerdtree for all tabs
 "TODO review Invalid in Windows
-Plugin 'Xuyuanp/nerdtree-git-plugin'	"extended git status in nerdtree
+Plugin 'Xuyuanp/nerdtree-git-plugin'	"extended git status in nerdtree, but git will cause VIM be slow down
 Plugin 'scrooloose/nerdcommenter'		"section comment and uncomment
 Plugin 'vim-airline/vim-airline' | Plugin 'vim-airline/vim-airline-themes' | Plugin 'Shaiya2688/consolas-font-for-powerline'
 Plugin 'ctrlpvim/ctrlp.vim'	"file search and buffer manager
 Plugin 'airblade/vim-gitgutter'	"or Plugin 'mhinz/vim-signify'
+" Plugin 'tpope/vim-fugitive'		"indicate git branch in airline, but git will cause VIM be slow down
 Plugin 'SirVer/ultisnips' | Plugin 'honza/vim-snippets'	"Common useful snippets for the ultisnips engine.
 "Plugin 'unblevable/quick-scope' unusefull
 Plugin 'Shaiya2688/SrcExpl' "Plugin 'wesleyche/SrcExpl', A context window, fix a bug in function SrcExpl_AdaptPlugins()
@@ -356,6 +357,7 @@ let g:tagbar_previewwin_pos = 'bo'
 nmap , :TagbarToggle<cr>
 
 "Plugin 'scrooloose/nerdtree'
+let g:nerdtree_tabs_open_on_gui_startup = 0
 autocmd StdinReadPre * let s:std_in=1
 " autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 " autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
@@ -444,6 +446,7 @@ let g:ctrlp_types = ['mru', 'buf', 'fil']	"<c-b>/<c-f>/<c-up>/<c-down> switch se
 " let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
 
 "Plugin 'airblade/vim-gitgutter'
+let g:gitgutter_enabled = 0		"disable at startup, enable git will cause VIM be slow down
 nmap <Space>t :GitGutterToggle<cr>
 nmap git :GitGutterToggle<cr>
 nmap gits :GitGutterLineHighlightsToggle<cr>
