@@ -135,6 +135,20 @@ vn <F4> y:call JumpStack_Begin()<cr>:vimgrep<Space>/<C-r>0/<Space>%<Space>**<cr>
 nn <F2> /<C-r><C-w><cr>
 nn <F3> :call JumpStack_Begin()<cr>/<C-r><C-w><cr>:vimgrep<Space>/<C-r>//<Space>%<cr>:call JumpStack_Done()<cr>:bo copen<cr><cr>
 nn <F4> :call JumpStack_Begin()<cr>/<C-r><C-w><cr>:vimgrep<Space>/<C-r>//<Space>%<Space>**<cr>:call JumpStack_Done()<cr>:bo copen<cr><cr>
+nn <C-F3> :call Search_R("t1")<cr>
+nn <C-F4> :call Search_R("t2")<cr>
+func Search_R(_type)
+	let input_pat = input("> Find pattern input: ")
+	if input_pat != ""
+		if a:_type== "t1"
+			call feedkeys(":call JumpStack_Begin()\<CR>\/".input_pat."\<CR>:vimgrep \/".input_pat."\/ %\<CR>:call JumpStack_Done()\<CR>:bo copen\<CR>\<CR>", "n")
+		elseif a:_type == "t2"
+			call feedkeys(":call JumpStack_Begin()\<CR>\/".input_pat."\<CR>:vimgrep \/".input_pat."\/ % **\<CR>:call JumpStack_Done()\<CR>:bo copen\<CR>\<CR>", "n")
+		endif
+	else
+		call feedkeys(":echo\<cr>", "n")
+	endif
+endfunc
 
 "Quickfix window shortcuts setting
 nn <F5> :if !JumpWinInvalid()\|cp\|endif<cr>
@@ -226,7 +240,7 @@ Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'		"extended nerdtree for all tabs
 "TODO review Invalid in Windows
-Plugin 'Xuyuanp/nerdtree-git-plugin'	"extended git status in nerdtree, but git will cause VIM be slow down
+" Plugin 'Xuyuanp/nerdtree-git-plugin'	"extended git status in nerdtree, but git will cause VIM be slow down
 Plugin 'scrooloose/nerdcommenter'		"section comment and uncomment
 Plugin 'vim-airline/vim-airline' | Plugin 'vim-airline/vim-airline-themes' | Plugin 'Shaiya2688/consolas-font-for-powerline'
 Plugin 'ctrlpvim/ctrlp.vim'	"file search and buffer manager
@@ -442,6 +456,7 @@ let g:ctrlp_by_filename = 1		"<c-d> switch whether match directory
 let g:ctrlp_regexp = 1		"<c-r> switch whether match use regexp
 let g:ctrlp_match_window = 'bottom,order:ttb,min:1,max:10,results:50'
 let g:ctrlp_switch_buffer = 'et'
+let g:ctrlp_max_files = 100000
 let g:ctrlp_types = ['mru', 'buf', 'fil']	"<c-b>/<c-f>/<c-up>/<c-down> switch search mode
 " let g:ctrlp_reuse_window = 'netrw\|help\|quickfix'
 
@@ -714,7 +729,9 @@ func HelpCmdInfo()
 	echoh Comment | echo "search setting" | echoh None
 	call HelpCmdString("NONE-I", "<F2>", "search this or selected pattern")
 	call HelpCmdString("NONE-I", "<F3>", "search all of this or selected pattern in current file and list results in Quickfix window")
+	call HelpCmdString("NONE-I", "<C-F3>", "search all of input pattern in current file and list results in Quickfix window")
 	call HelpCmdString("NONE-I", "<F4>", "recursive search all of this or selected pattern below current directory and list results in Quickfix window")
+	call HelpCmdString("NONE-I", "<C-F4>", "recursive search all of input pattern below current directory and list results in Quickfix window")
 
 	echoh Comment | echo "Quickfix window setting" | echoh None
 	call HelpCmdString("NORMAL", "<F5>", "Jump to Quickfix next item")
