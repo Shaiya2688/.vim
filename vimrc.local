@@ -12,6 +12,7 @@ set nowrap			"no wrap long line
 set nu				"view line number
 set ts=4			"set tab view size
 set ignorecase		"ignore character case
+" set smartcase
 "colorscheme desert	"may be need in the future
 set backspace=indent,eol,start	"set backspace can remove autoindent or join previous line(VI is disable)
 set showmatch		"when a bracket is inserted, briefly jump to the matching one if the match can be seen on the screen.
@@ -41,6 +42,7 @@ map <s-x> :set<Space>mouse=v<cr>
 "set autoindent
 set smartindent
 set shiftwidth=4
+" autocmd bufenter * if (expand("%:e") == "cpp") | set expandtab | endif
 
 "vim diff settings
 "set crb (be temporarily set by default)
@@ -126,7 +128,7 @@ func Search_R(_type)
 		if a:_type== "t1"
 			call feedkeys(":call JumpStack_Begin()\<CR>\/".input_pat."\<CR>:vimgrep \/".input_pat."\/ %\<CR>:call JumpStack_Done()\<CR>:bo copen\<CR>\<CR>", "n")
 		elseif a:_type == "t2"
-			call feedkeys(":call JumpStack_Begin()\<CR>\/".input_pat."\<CR>:vimgrep \/".input_pat."\/ % **\<CR>:call JumpStack_Done()\<CR>:bo copen\<CR>\<CR>", "n")
+			call feedkeys(":call JumpStack_Begin()\<CR>:vimgrep \/".input_pat."\/ % **\<CR>:call JumpStack_Done()\<CR>:bo copen\<CR>\/".input_pat."\<CR>\<CR>", "n")
 		endif
 	else
 		call feedkeys(":echo\<cr>", "n")
