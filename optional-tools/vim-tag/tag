@@ -1,0 +1,163 @@
+#!/bin/bash
+# by huanhhuan.zhuang
+#
+
+todo=""
+file_type=.h,.c,.cpp,.cc,.cxx,.hxx,.hpp,.s,.S,
+file_path=.
+
+function usage_msg()
+{
+	echo 'Usage: '$0' [-iurch] [-t .h,.c] [-f ./src,./include]
+    -i: install TAG files, return if TAG exists
+    -u: update TAG files as -t and -f option same as the previously used options
+    -r: reinstall TAG files with new -t and -f option
+    -c: clean TAG files
+    -h: display this help and exit
+    -t: file type for -i or -r option, default ".h,.c,.cpp,.cc,.cxx,.hxx,.hpp,.s,.S"
+    -f: file path for -i or -r option, default "./"
+
+list-language-types:
+	Ant      *.build.xml
+	Asm      *.asm *.ASM *.s *.S *.A51 *.29[kK] *.[68][68][kKsSxX] *.[xX][68][68]
+	Asp      *.asp *.asa
+	Awk      *.awk *.gawk *.mawk
+	Basic    *.bas *.bi *.bb *.pb
+	BETA     *.bet
+	C        *.c
+	C++      *.c++ *.cc *.cp *.cpp *.cxx *.h *.h++ *.hh *.hp *.hpp *.hxx *.C *.H
+	C#       *.cs
+	Cobol    *.cbl *.cob *.CBL *.COB
+	DosBatch *.bat *.cmd
+	Eiffel   *.e
+	Erlang   *.erl *.ERL *.hrl *.HRL
+	Flex     *.as *.mxml
+	Fortran  *.f *.for *.ftn *.f77 *.f90 *.f95 *.F *.FOR *.FTN *.F77 *.F90 *.F95
+	Go       *.go
+	HTML     *.htm *.html
+	Java     *.java
+	JavaScript *.js
+	Lisp     *.cl *.clisp *.el *.l *.lisp *.lsp
+	Lua      *.lua
+	Make     *.mak *.mk [Mm]akefile GNUmakefile
+	MatLab   *.m
+	ObjectiveC *.m *.h
+	OCaml    *.ml *.mli
+	Pascal   *.p *.pas
+	Perl     *.pl *.pm *.plx *.perl
+	PHP      *.php *.php3 *.phtml
+	Python   *.py *.pyx *.pxd *.pxi *.scons
+	REXX     *.cmd *.rexx *.rx
+	Ruby     *.rb *.ruby
+	Scheme   *.SCM *.SM *.sch *.scheme *.scm *.sm
+	Sh       *.sh *.SH *.bsh *.bash *.ksh *.zsh
+	SLang    *.sl
+	SML      *.sml *.sig
+	SQL      *.sql
+	Tcl      *.tcl *.tk *.wish *.itcl
+	Tex      *.tex
+	Vera     *.vr *.vri *.vrh
+	Verilog  *.v
+	VHDL     *.vhdl *.vhd
+	Vim      *.vim
+	YACC     *.y
+'
+
+}
+
+while getopts ":t:f:iurch" opt; do
+	case $opt in
+		t)
+			file_type=$OPTARG
+			;;
+		f)
+			file_path=$OPTARG
+			;;
+		i)
+			todo="install"
+			;;
+		u)
+			todo="update"
+			;;
+		r)
+			todo="reinstall"
+			;;
+		c)
+			todo="clean"
+			;;
+		h)
+			todo="help"
+			break
+			;;
+		?)
+			echo "Invalid option: $OPTARG!"
+			todo="help"
+			break
+			;;
+	esac
+done
+
+case "$todo" in
+	"install"|"update"|"reinstall")
+		if [ -f "cscope.files" -a $todo = "install" ]; then
+			echo "cscope.files exists!"
+			exit -1
+		fi
+		if [ $todo = "update" ]; then
+			if [ -f "cscope.files" ]; then
+				rm -f "cscope.out" "cscope.po.out" "cscope.in.out" "tags"
+				cscope -bkq -i "cscope.files"
+				ctags -R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+ia --extra=+q -L cscope.files
+				exit 0
+			else
+				echo "cscope.files not exists!"
+				exit -1
+			fi
+		fi
+		rm -f "cscope.files" "cscope.out" "cscope.po.out" "cscope.in.out" "tags"
+		_type=${file_type%%,*}
+		file_type=${file_type#*,}
+		find_name_pattern="-name \"*$_type\""
+		while [ "$file_type" != "" -a "$file_type" != "$_type" ]; do
+			_type=${file_type%%,*}
+			file_type=${file_type#*,}
+			find_name_pattern=${find_name_pattern}" -o -name \"*$_type\""
+		done
+		_path=${file_path%%,*}
+		file_path=${file_path#*,}
+		if [ -n "$_path" -a -d "$_path" -a -x "$_path" ]; then
+			pushd "$_path" 1>/dev/null && 2>&1
+			file_path_items[${#file_path_items[*]}]=$PWD
+			popd 1>/dev/null && 2>&1
+		fi
+		while [ "$file_path" != "" -a "$file_path" != "$_path" ]; do
+			_path=${file_path%%,*}
+			file_path=${file_path#*,}
+			if [ -n "$_path" -a -d "$_path" -a -x "$_path" ]; then
+				pushd "$_path" 1>/dev/null && 2>&1
+				file_path_items[${#file_path_items[*]}]=$PWD
+				popd 1>/dev/null && 2>&1
+			fi
+		done
+
+		for i in ${file_path_items[@]}; do
+			find_cmd="find $i "${find_name_pattern}" >> \"cscope.files.tmp\""
+			eval $find_cmd
+		done
+		if [ -f "cscope.files.tmp" ]; then
+			cat "cscope.files.tmp"|sort -u > "cscope.files"
+			rm -f "cscope.files.tmp"
+			# mv cscope.files.tmp cscope.files
+			if [ -f "cscope.files" ]; then
+				cscope -bkq -i "cscope.files"
+				ctags -R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+ia --extra=+q -L cscope.files
+			fi
+		fi
+		;;
+	"clean")
+		rm -f "cscope.files" "cscope.out" "cscope.po.out" "cscope.in.out" "tags"
+		echo "clean TAG files."
+		;;
+	*)	usage_msg
+		;;
+esac
