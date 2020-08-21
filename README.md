@@ -25,10 +25,10 @@ git clone https://github.com/junegunn/vim-plug ~/.vim/bundle/vim-plug
 ```
 
 __4. Install Plugins:__
-Launch ```vim``` and run ```:PluginInstall``` (keymap: ```<F10>```)
+Launch `vim` and run `:PluginInstall` (keymap: `<F10>`)
 
 __5. About Keymap Usage:__
-Launch vim and type ```<Ctrl-F1>``` to show keymap usage information
+Launch vim and type `<Ctrl-F1>` to show keymap usage information
 
 ## Optional Installation
 __1. Setup the optional tools environment:__
@@ -43,7 +43,7 @@ __2. LSP client and Language Servers environment setup__
 
 >LSP client and Language Servers check *[LSP implementations](https://langserver.org)*
 
-+ Setup the [Nodejs](https://nodejs.org/en/download/) environment if select [coc.nvim](https://github.com/neoclide/coc.nvim) as LSP client,  [coc.nvim](https://github.com/neoclide/coc.nvim) require [Nodejs](https://nodejs.org/en/download/) >= ```10.12```, more information see the [coc.nvim](https://github.com/neoclide/coc.nvim)
++ Setup the [Nodejs](https://nodejs.org/en/download/) environment if select [coc.nvim](https://github.com/neoclide/coc.nvim) as LSP client,  [coc.nvim](https://github.com/neoclide/coc.nvim) require [Nodejs](https://nodejs.org/en/download/) >= `10.12`, more information see the [coc.nvim](https://github.com/neoclide/coc.nvim)
 ```bash
 git clone https://github.com/nodejs/node ~/.vim/nodejs 
 cd ~/.vim/nodejs
@@ -54,8 +54,6 @@ git checkout -b current remotes/origin/vxxxx
 sudo make install
 node -v
 ``` 
-Refer *[Nodejs Download](https://nodejs.org/en/download/)* for more installation ways
-
-After installing the Nodejs, Launch ```vim``` and run ```:PluginInstall``` (keymap: ```<F10>```)
-
+Refer *[Nodejs Download](https://nodejs.org/en/download/)* for more installation ways<br>
+After installing the Nodejs, Launch `vim` and run `:PluginInstall` (keymap: `<F10>`)
 
