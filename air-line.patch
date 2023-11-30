@@ -1,0 +1,65 @@
+commit ffda36177dc3b308c644cf0a6ed2a9cd610236a0
+Author: huanhuan_zhuang <Huanhuan_Zhuang@vive.com>
+Date:   Tue Dec 5 18:44:30 2023 +0800
+
+    add default name for quickfix and location list buffer
+
+diff --git a/autoload/airline/extensions/tabline/formatters/default.vim b/autoload/airline/extensions/tabline/formatters/default.vim
+index 7cdb7c4..10ef508 100644
+--- a/autoload/airline/extensions/tabline/formatters/default.vim
++++ b/autoload/airline/extensions/tabline/formatters/default.vim
+@@ -7,11 +7,26 @@ if !exists(":def") || !airline#util#has_vim9_script()
+   function! airline#extensions#tabline#formatters#default#format(bufnr, buffers)
+     let fnametruncate = get(g:, 'airline#extensions#tabline#fnametruncate', 0)
+     let fmod = get(g:, 'airline#extensions#tabline#fnamemod', ':~:.')
++    " let quickfix_name = get(g:, 'airline#extensions#quickfix#quickfix_text', 'Quickfix')
++    " let location_name = get(g:, 'airline#extensions#quickfix#location_text', 'Location')
+     let _ = ''
+ 
++    " if len(win_findbuf(a:bufnr))
++    "   let bufwin = win_findbuf(a:bufnr)[0]
++    " else
++    "   let bufwin = -1
++    " endif
++
+     let name = bufname(a:bufnr)
+     if empty(name)
+-      let _ = '[No Name]'
++      " if getqflist({'qfbufnr' : 0}).qfbufnr == a:bufnr
++      "   let _ .= quickfix_name
++      " elseif bufwin > 0 && getloclist(bufwin, {'qfbufnr' : 0}).qfbufnr == a:bufnr
++      "   let winnr = getwininfo(bufwin)[0].winnr
++      "   let _ .= winnr.'.'.location_name
++      " else
++        let _ .= '[No Name]'
++      " endif
+     elseif name =~ 'term://'
+       " Neovim Terminal
+       let _ = substitute(name, '\(term:\)//.*:\(.*\)', '\1 \2', '')
+@@ -49,11 +64,25 @@ else
+   def airline#extensions#tabline#formatters#default#format(bufnr: number, buffers: list<number>): string
+ 		var fnametruncate = get(g:, 'airline#extensions#tabline#fnametruncate', 0)
+     var fmod = get(g:, 'airline#extensions#tabline#fnamemod', ':~:.')
++    " var quickfix_name = get(g:, 'airline#extensions#quickfix#quickfix_text', 'Quickfix')
++    " var location_name = get(g:, 'airline#extensions#quickfix#location_text', 'Location')
+     var result = ''
++    " var bufwin = -1
++
++    " if len(win_findbuf(a:bufnr))
++    "   bufwin = win_findbuf(a:bufnr)[0]
++    " endif
+ 
+     var name = bufname(bufnr)
+     if empty(name)
+-      result = '[No Name]'
++      " if getqflist({'qfbufnr' : 0}).qfbufnr == a:bufnr
++      "   result = quickfix_name
++      " elseif bufwin > 0 && getloclist(bufwin, {'qfbufnr' : 0}).qfbufnr == a:bufnr
++      "   var winnr = getwininfo(bufwin)[0].winnr
++      "   result = ''.winnr.'.'.location_name
++      " else
++        result = '[No Name]'
++      " endif
+     elseif name =~ 'term://'
+       # Neovim Terminal
+       result = substitute(name, '\(term:\)//.*:\(.*\)', '\1 \2', '')

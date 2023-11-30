@@ -26,7 +26,7 @@ git clone https://github.com/junegunn/vim-plug ~/.vim/bundle/vim-plug
 ```
 
 __4. Install Plugins:__
-Launch `vim` and run `:PlugInstall` (keymap: `<F10>`)
+Launch `vim` and run `:PlugInstall` (keymap: `<Ctrl-F9>`)
 
 __5. About Keymap Usage:__
 Launch vim and type `<Ctrl-F1>` to show keymap usage information
@@ -56,4 +56,4 @@ sudo make install
 node -v
 ```
 Refer *[Nodejs Download](https://nodejs.org/en/download/)* for more installation ways<br>
-After installing the Nodejs, Launch `vim` and run `:PlugInstall` (keymap: `<F10>`)
+After installing the Nodejs, Launch `vim` and run `:PlugInstall` (keymap: `<Ctrl-F9>`)

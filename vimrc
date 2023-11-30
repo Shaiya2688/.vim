@@ -53,10 +53,56 @@ set ttimeoutlen=50	"The time in milliseconds that is waited for a key code or ma
 "Help key map for show defined commands"
 nmap <silent> <C-F1> :call HelpCmdInfo()<cr>
 
+"terminal setting
+if has('terminal')
+	if executable('bash')
+		nn <silent> <leader>T :ter ++close bash<cr>
+		nn <silent> <leader><C-t> :tab ter ++close bash<cr>
+	else
+		nn <silent> <leader>T :ter ++close<cr>
+		nn <silent> <leader><C-t> :tab ter ++close<cr>
+	endif
+
+	func! Terminal_ExitNormalMode()
+		unm <buffer> <silent> <RightMouse>
+		unm <buffer> <silent> <C-w>t
+		unm <buffer> <silent> <C-w><C-t>
+		unm <buffer> <silent> <C-w>q
+		unm <buffer> <silent> <C-w><C-q>
+		call feedkeys("A")
+	endfunc
+
+	func! Terminal_EnterNormalMode()
+		if &buftype == 'terminal' && mode('') == 't'
+			call feedkeys("\<c-w>N")
+			nor <buffer> <silent> <RightMouse> :<C-u>call Terminal_ExitNormalMode()<cr>
+			nor <buffer> <silent> <C-w>t :<C-u>call Terminal_ExitNormalMode()<cr>
+			nor <buffer> <silent> <C-w><C-t> :<C-u>call Terminal_ExitNormalMode()<cr>
+			nor <buffer> <silent> <C-w>q <C-w>:<C-u>q!<cr>
+			nor <buffer> <silent> <C-w><C-q> <C-w>:<C-u>q!<cr>
+
+		endif
+	endfunc
+
+	"scroll twice to avoid the middlemouse click trigger incorrectly
+	tno <silent> <ScrollWheelUp><ScrollWheelUp> <C-w>:call Terminal_EnterNormalMode()<cr>
+	tno <silent> <C-w>n <C-w>:call Terminal_EnterNormalMode()<cr>
+	tno <silent> <C-w><C-n> <C-w>:call Terminal_EnterNormalMode()<cr>
+	tno <silent> <C-w>q <C-w>:q!<cr>
+	tno <silent> <C-w><C-q> <C-w>:q!<cr>
+endif
+
 "mouse mode setting
 set mouse=nvih
-map <space>z :<c-u>set mouse=nvih<cr>
-map <space>x :<c-u>set mouse=v<cr>
+func! MouseModeSwitch()
+	if &mouse !=# 'nvih'
+		set mouse=nvih
+	else
+		set mouse=v
+	endif
+endfunc
+map <silent> <C-w><C-m> :call MouseModeSwitch()<cr>
+map <silent> <C-w>m :call MouseModeSwitch()<cr>
 
 "indent setting
 " set autoindent
@@ -79,6 +125,13 @@ set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
 if v:lang =~ "utf8$" || v:lang =~ "utf-8$"
   set fencs=utf-8,ucs-bom,latin1
 endif
+
+"fix vim9 show keycode ^[[?4m or ^[[>4;2m or ^[[>4;m if terminal use gnome-terminal
+set t_RK=
+set t_TI=
+set t_TE=
+"fix vim show keycode ^[[%p1%d q when enter terminal job mode
+set t_SH=
 
 "font setting
 " set guifont=Courier_New:h11:cANSI
@@ -326,13 +379,13 @@ Plug 'Shaiya2688/bracket-highlight'
 "TagList or Tagbar for tag window
 Plug 'majutsushi/tagbar'
 Plug 'preservim/nerdtree'
-Plug 'jistr/vim-nerdtree-tabs'		"extended nerdtree for all tabs
+" Plug 'jistr/vim-nerdtree-tabs'		"extended nerdtree for all tabs
 Plug 'Xuyuanp/nerdtree-git-plugin'	"extended git status in nerdtree
 Plug 'scrooloose/nerdcommenter'		"section comment and uncomment
 Plug 'vim-airline/vim-airline' | Plug 'vim-airline/vim-airline-themes'
 Plug 'ctrlpvim/ctrlp.vim'		"file search and buffer manager
 Plug 'airblade/vim-gitgutter' | Plug 'tpope/vim-fugitive'
-Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'	"Common useful snippets for the ultisnips engine.
+" Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'	"Common useful snippets for the ultisnips engine.
 Plug 'Shaiya2688/SrcExpl'		"Plug 'wesleyche/SrcExpl', A context window, fix a bug in function SrcExpl_AdaptPlugins()
 "vim-lsp or coc.nvim as LSP client for Vim editor, see https://langserver.org for LSP client and language server implementations select
 " Plug 'prabirshrestha/vim-lsp'
@@ -348,14 +401,15 @@ if has_key(g:plugs, "vim-lsp")
 elseif has_key(g:plugs, 'coc.nvim')
 else
 	"OmniCppComplete + AutoComplPop combination or YouCompleteMe(need compile manually)
+	" need check blocking
 	Plug 'vim-scripts/OmniCppComplete'
 	Plug 'vim-scripts/AutoComplPop'
 endif
 call plug#end()
 nmap <silent> <F9> :PlugStatus<cr>
-nmap <silent> <S-F9> :PlugClean<cr>
-nmap <silent> <F10> :PlugInstall<cr>
-nmap <silent> <S-F10> :PlugUpdate<cr>
+nmap <silent> <C-F9> :PlugInstall<cr>
+nmap <silent> <S-F9> :PlugUpdate<cr>
+nmap <silent> <A-F9> :PlugClean<cr>
 
 au BufNewFile,BufReadPost * call LoadingFileTypeSetting()
 
@@ -433,6 +487,58 @@ let g:acp_behaviorKeywordCommand = "\<C-p>"
 " let g:acp_completeoptPreview = 1
 
 "Plug 'majutsushi/tagbar'
+func! TagbarWinList()
+	let winid_list = []
+	let tabnr = tabpagenr()
+	let winnum = tabpagewinnr(tabnr, '$')
+	let winidx = 1
+	while winidx <= winnum
+		let name = bufname(winbufnr(winidx))
+		if name =~# "__Tagbar__.*"
+			let winid = win_getid(winidx, tabnr)
+			if winid > 0
+				call add(winid_list, winid)
+			endif
+		endif
+		let winidx = winidx + 1
+	endwhile
+	return winid_list
+endfunc
+func! TagbarToggleSingleWin()
+	let winid_list = TagbarWinList()
+	if (len(winid_list) > 0)
+		for winid in winid_list
+			call win_execute(winid, 'q')
+		endfor
+	else
+		silent! exe 'TagbarToggle'
+	endif
+endfunc
+func! TagbarAutoUpdate()
+	if JumpWinInvalid()
+		return
+	endif
+	let curr_bufnr = bufnr()
+	if exists("t:valid_bufnr") && t:valid_bufnr == curr_bufnr
+		return
+	endif
+	let t:valid_bufnr = curr_bufnr
+	let curr_winid = win_getid()
+	let winid_list = TagbarWinList()
+	if (len(winid_list) > 0)
+		for winid in winid_list
+			" call win_execute(winid, 'normal s')
+			" call win_execute(winid, 'normal s')
+			call win_gotoid(winid)
+			" exe "normal s"
+			" exe "normal s"
+			silent! exe "normal s"
+			silent! exe "normal s"
+			call win_gotoid(curr_winid)
+			return
+		endfor
+	endif
+endfunc
 let g:tagbar_left = 1
 let g:tagbar_width=33
 let g:tagbar_sort = 0
@@ -443,13 +549,18 @@ let g:tagbar_autofocus = 1
 let g:tagbar_autoshowtag = 0
 let g:tagbar_previewwin_pos = 'bo'
 " let g:tagbar_ctags_bin='/usr/bin/ctags'
-nmap <silent> , :TagbarToggle<cr>
+" nmap <silent> , :TagbarToggle<cr>
+nmap <silent> , :call TagbarToggleSingleWin()<cr>
+autocmd BufEnter * call TagbarAutoUpdate() "fix tagbar not auto update
 
 "Plug 'scrooloose/nerdtree'
 autocmd StdinReadPre * let s:std_in=1
-" autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+" autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
+autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists('s:std_in') | exe 'NERDTree' argv()[0] | wincmd p | ene | exe 'cd '.argv()[0] | endif
+autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | call feedkeys(":q\<cr>") | endif
+" autocmd BufEnter * if &buftype != 'quickfix' && getcmdwintype() == '' | silent NERDTreeMirror | endif
+" autocmd BufEnter * if winnr() == winnr('h') && bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
+    " \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
 let NERDTreeWinPos='right'
 let NERDTreeWinSize=48
 let NERDTreeShowLineNumbers=0
@@ -457,14 +568,35 @@ let NERDTreeShowBookmarks=1
 let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
 "replace with NERDTreeTabsToggle to manager for all tabs
-" nmap <silent> . :NERDTreeToggle<CR>
+nmap <silent> . :NERDTreeToggle<CR>
+"
+" toggle NERDTree in current tab and match the state in all other tabs
+" func! NERDTreeToggleAllTabs()
+"   if exists("t:NERDTreeBufName") && bufwinnr(t:NERDTreeBufName) != -1
+"       " tabdo doesn't preserve current tab - save it and restore it afterwards
+"       let current_tab = tabpagenr()
+"       tabdo silent NERDTreeClose
+"       exe 'tabn ' . current_tab
+"   else
+"       " call s:NERDTreeOpenAllTabs()
+"       NERDTreeToggle
+"       " force focus to NERDTree in current tab
+"       " wincmd p
+"       if exists("t:NERDTreeBufName") && bufwinnr(t:NERDTreeBufName) != -1
+"           exe bufwinnr(t:NERDTreeBufName) . "wincmd w"
+"       endif
+"   endif
+" endfun
+" nmap <silent> . :call NERDTreeToggleAllTabs()<cr>
+
 
 "Plug 'jistr/vim-nerdtree-tabs'
-map <silent> . <plug>NERDTreeTabsToggle<CR>
+" map <silent> . <plug>NERDTreeTabsToggle<CR>
 "use NERDTreeTabsToggle to manager for all tabs
-map <silent> <leader>. <plug>NERDTreeFocusToggle<CR>
+" map <silent> <leader>. <plug>NERDTreeFocusToggle<CR>
 
 "Plug 'Xuyuanp/nerdtree-git-plugin'
+let g:NERDTreeGitStatusEnable = 0 "default enable set
 let g:NERDTreeGitStatusPorcelainVersion = 1	"set to 1 if git --version < v2.11.0
 let g:NERDTreeGitStatusIndicatorMapCustom = {
     \ "Modified"  : "✹",
@@ -520,7 +652,7 @@ let g:airline#extensions#tabline#show_buffers = 0
 let g:airline#extensions#tabline#show_tab_nr = 1
 let g:airline#extensions#tabline#show_tab_type = 0
 let g:airline#extensions#tabline#fnamemod = ':t'
-let g:airline#extensions#tabline#tabnr_formatter = 'AirLineTabNrFormatter'
+" let g:airline#extensions#tabline#tabnr_formatter = 'AirLineTabNrFormatter'
 let g:airline#extensions#tabline#tabtitle_formatter = 'AirLineTabTitleFormatter'
 let g:airline#extensions#hunks#non_zero_only = 1
 autocmd User AirlineAfterInit call AirlineInit()
@@ -1223,9 +1355,15 @@ func HelpCmdInfo()
 	call HelpCmdString("NORMAL", "<leader>h3", "[optional-tools] map GUI color to cterm for colorscheme file in edit")
 	call HelpCmdString("NORMAL", "<leader>h4", "map cterm color to GUI on split buffer")
 
+	echoh Comment | echo "terminal setting" | echoh None
+	call HelpCmdString("NORMAL", "<leader>T", "Open terminal current tabpage, 'bash' as the preferred shell")
+	call HelpCmdString("NORMAL", "<leader><C-T>", "Open terminal in new tabpage, 'bash' as the preferred shell")
+	call HelpCmdString("NORMAL", "<C-W>q", "Close terminal")
+	call HelpCmdString("NORMAL", "<C-W>n or <ScrollWheelUp>", "Enter terminal normal mode")
+	call HelpCmdString("NORMAL", "<C-W>t or <RightMouse>", "Exit terminal normal mode")
+
 	echoh Comment | echo "mouse mode setting" | echoh None
-	call HelpCmdString("COMMON", "<Space>z", "set mouse=nvih")
-	call HelpCmdString("COMMON", "<Space>x", "set mouse=v")
+	call HelpCmdString("COMMON", "<C-W>m", "switch mouse between 'nvih' and 'v'")
 
 	echoh Comment | echo "fold setting" | echoh None
 	call HelpCmdString("NORMAL", "<Space>r", "set fdc=3/0")
@@ -1236,10 +1374,10 @@ func HelpCmdInfo()
 	call HelpCmdString("NORMAL", "<Space>e", "v% : smart matching {()}")
 
 	echoh Comment | echo "window setting" | echoh None
-	call HelpCmdString("COMMON", "<A-LEFT>", "move cursor to left window")
-	call HelpCmdString("COMMON", "<A-RIGHT>", "move cursor to right window")
-	call HelpCmdString("COMMON", "<A-UP>", "move cursor to above window")
-	call HelpCmdString("COMMON", "<A-DOWN>", "move cursor to below window")
+	call HelpCmdString("COMMON", "<A-LEFT> or <C-W><LEFT>", "move cursor to left window")
+	call HelpCmdString("COMMON", "<A-RIGHT> or <C-W><RIGHT>", "move cursor to right window")
+	call HelpCmdString("COMMON", "<A-UP> or <C-W><UP>", "move cursor to above window")
+	call HelpCmdString("COMMON", "<A-DOWN> or <C-W><DOWN>", "move cursor to below window")
 	call HelpCmdString("COMMON", "<S-A-LEFT>", "Decrease current window width")
 	call HelpCmdString("COMMON", "<S-A-RIGHT>", "Increase current window width")
 	call HelpCmdString("COMMON", "<S-A-UP>", "Increase current window height")
@@ -1293,9 +1431,9 @@ func HelpCmdInfo()
 
 	echoh Comment | echo "Vim Plugin Manager setting" | echoh None
 	call HelpCmdString("NORMAL", "<F9>", "Vim-Plug PlugStatus")
-	call HelpCmdString("NORMAL", "<S-F9>", "Vim-Plug PlugClean")
-	call HelpCmdString("NORMAL", "<F10>", "Vim-Plug PlugInstall")
-	call HelpCmdString("NORMAL", "<S-F10>", "Vim-Plug PlugUpdate")
+	call HelpCmdString("NORMAL", "<C-F9>", "Vim-Plug PlugInstall")
+	call HelpCmdString("NORMAL", "<S-F9>", "Vim-Plug PlugUpdate")
+	call HelpCmdString("NORMAL", "<A-F9>", "Vim-Plug PlugClean")
 
 	echoh Comment | echo "Color Mark setting" | echoh None
 	call HelpCmdString("NONE-I", "<leader>m or <leader>r", "mark and unmark pattern with different color")
